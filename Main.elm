@@ -1,9 +1,10 @@
 module Main exposing (main)
 
+import Color exposing (Color)
 import Html exposing (..)
 import Html.App as App
-import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
+import Element exposing (Element)
 import Random.Pcg as Rand
 
 
@@ -98,36 +99,89 @@ toLine i =
 view : Model -> Html Action
 view model =
     div []
-        [ div
-            [ style
-                [ ( "font-family", "monospace" )
-                , ( "font-size", "50px" )
-                , ( "margin", "0.5em" )
-                ]
-            ]
-            (List.map toHtml model.hexagram)
-        , button [ onClick Refresh ] [ text "Refresh" ]
+        [ drawHexagram model.hexagram
+        , button [ onClick Refresh ] [ text "Again" ]
         ]
 
 
-toHtml : Line -> Html a
-toHtml line =
+drawHexagram : List Line -> Html a
+drawHexagram lines =
     let
-        lineString =
-            case line of
-                YoungYin ->
-                    "─ ─"
+        before =
+            List.map beforeChange lines
+                |> List.intersperse (Element.spacer 1 10)
+                |> Element.flow Element.down
 
-                YoungYang ->
-                    "╌ ╌"
+        after =
+            List.map afterChange lines
+                |> List.intersperse (Element.spacer 1 10)
+                |> Element.flow Element.down
 
-                OldYin ->
-                    "─ ╌"
-
-                OldYang ->
-                    "╌ ─"
+        gap =
+            Element.spacer 50 1
     in
-        div
-            [ style [ ( "margin-top", "-0.3em" ) ]
+        [ before, gap, after ]
+            |> Element.flow Element.left
+            |> Element.container 400 300 Element.middle
+            |> Element.color backColor
+            |> Element.toHtml
+
+
+beforeChange : Line -> Element
+beforeChange line =
+    case line of
+        YoungYin ->
+            yinElement
+
+        YoungYang ->
+            yangElement
+
+        OldYin ->
+            yinElement
+
+        OldYang ->
+            yangElement
+
+
+afterChange : Line -> Element
+afterChange line =
+    case line of
+        YoungYin ->
+            yinElement
+
+        YoungYang ->
+            yangElement
+
+        OldYin ->
+            yangElement
+
+        OldYang ->
+            yinElement
+
+
+yinElement : Element
+yinElement =
+    let
+        halfBar =
+            Element.color foreColor (Element.spacer 25 10)
+    in
+        Element.flow Element.left
+            [ halfBar
+            , Element.spacer 15 10
+            , halfBar
             ]
-            [ text lineString ]
+
+
+yangElement : Element
+yangElement =
+    Element.color foreColor (Element.spacer 65 10)
+
+
+backColor : Color
+backColor =
+    Color.black
+
+
+foreColor : Color
+foreColor =
+    Color.white
