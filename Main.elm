@@ -18,11 +18,8 @@ type alias Model =
     }
 
 
-type Line
-    = YoungYin
-    | YoungYang
-    | OldYin
-    | OldYang
+type alias Line =
+    ( Bool, Bool )
 
 
 main : Program ( Int, Int )
@@ -69,28 +66,28 @@ toLine : Int -> Line
 toLine i =
     case i of
         1 ->
-            YoungYin
+            ( False, False )
 
         2 ->
-            YoungYin
+            ( False, False )
 
         3 ->
-            YoungYang
+            ( True, True )
 
         4 ->
-            YoungYin
+            ( False, False )
 
         5 ->
-            YoungYang
+            ( True, True )
 
         6 ->
-            YoungYang
+            ( True, True )
 
         7 ->
-            OldYin
+            ( False, True )
 
         8 ->
-            OldYang
+            ( True, False )
 
         _ ->
             Debug.crash "Out of range"
@@ -107,74 +104,74 @@ view model =
 drawHexagram : List Line -> Html a
 drawHexagram lines =
     let
-        before =
-            List.map beforeChange lines
-                |> List.intersperse (Element.spacer 1 10)
-                |> Element.flow Element.down
-
-        after =
-            List.map afterChange lines
-                |> List.intersperse (Element.spacer 1 10)
-                |> Element.flow Element.down
+        ( before, changes, after ) =
+            List.foldr splitLine ( [], [], [] ) lines
 
         gap =
-            Element.spacer 50 1
+            Element.spacer 20 1
     in
-        [ before, gap, after ]
-            |> Element.flow Element.left
+        [ drawHalfHexagram before
+        , gap
+        , drawChanges changes
+        , gap
+        , drawHalfHexagram after
+        ]
+            |> Element.flow Element.right
             |> Element.container 400 300 Element.middle
             |> Element.color backColor
             |> Element.toHtml
 
 
-beforeChange : Line -> Element
-beforeChange line =
-    case line of
-        YoungYin ->
-            yinElement
-
-        YoungYang ->
-            yangElement
-
-        OldYin ->
-            yinElement
-
-        OldYang ->
-            yangElement
+type alias Triple a =
+    ( a, a, a )
 
 
-afterChange : Line -> Element
-afterChange line =
-    case line of
-        YoungYin ->
-            yinElement
-
-        YoungYang ->
-            yangElement
-
-        OldYin ->
-            yangElement
-
-        OldYang ->
-            yinElement
+splitLine : Line -> Triple (List Bool) -> Triple (List Bool)
+splitLine ( before, after ) ( befores, changes, afters ) =
+    ( before :: befores
+    , xor before after :: changes
+    , after :: afters
+    )
 
 
-yinElement : Element
-yinElement =
+drawHalfHexagram : List Bool -> Element
+drawHalfHexagram halfLines =
+    List.map drawHalfLine halfLines
+        |> List.intersperse (Element.spacer 1 10)
+        |> Element.flow Element.down
+
+
+drawHalfLine : Bool -> Element
+drawHalfLine isYang =
+    if isYang then
+        Element.color foreColor (Element.spacer 65 10)
+    else
+        let
+            halfBar =
+                Element.color foreColor (Element.spacer 25 10)
+        in
+            Element.flow Element.left
+                [ halfBar
+                , Element.spacer 15 10
+                , halfBar
+                ]
+
+
+drawChanges : List Bool -> Element
+drawChanges changes =
     let
-        halfBar =
-            Element.color foreColor (Element.spacer 25 10)
+        box =
+            Element.spacer 12 12
+
+        dot isChanging =
+            if isChanging then
+                Element.color Color.red box
+            else
+                box
     in
-        Element.flow Element.left
-            [ halfBar
-            , Element.spacer 15 10
-            , halfBar
-            ]
-
-
-yangElement : Element
-yangElement =
-    Element.color foreColor (Element.spacer 65 10)
+        List.map dot changes
+            |> List.intersperse (Element.spacer 1 8)
+            |> Element.flow Element.down
 
 
 backColor : Color
