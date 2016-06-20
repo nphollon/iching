@@ -280,7 +280,7 @@ signDetails =
         , ( 16, ( 14, "Possession in\nGreat Measure" ) )
         , ( 17, ( 50, "The Caldron" ) )
         , ( 18, ( 30, "The Clinging" ) )
-        , ( 19, ( -1, "" ) )
+        , ( 19, ( 56, "The Wanderer" ) )
         , ( 20, ( 38, "Opposition" ) )
         , ( 21, ( 64, "Before Completion" ) )
         , ( 22, ( 21, "Biting Through" ) )
