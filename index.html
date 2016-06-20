@@ -1,0 +1,28 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta charset="UTF-8">
+    <title>Main</title>
+    <style>
+      body {
+      background: black;
+      }
+
+      button {
+      margin-left: 50px;
+      border: solid;
+      color: white;
+      font-size: 14pt;
+      background: black;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="text/javascript" src="elm.js"></script>
+    <script type="text/javascript">
+      var randInt = function () {
+        return Math.floor(Math.random() * 0xFFFFFFFF);
+      };
+      Elm.Main.fullscreen([ randInt(), randInt() ]);
+    </script>
+  </body>
+</html>
