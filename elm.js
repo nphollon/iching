@@ -9511,7 +9511,7 @@ var _user$project$Main$signDetails = _elm_lang$core$Dict$fromList(
 			{
 			ctor: '_Tuple2',
 			_0: 52,
-			_1: {ctor: '_Tuple2', _0: 54, _1: 'The Marrying Maiden'}
+			_1: {ctor: '_Tuple2', _0: 54, _1: 'The Marrying\nMaiden'}
 		},
 			{
 			ctor: '_Tuple2',
