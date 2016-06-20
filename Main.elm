@@ -313,7 +313,7 @@ signDetails =
         , ( 49, ( 32, "Duration" ) )
         , ( 50, ( 55, "Abundance" ) )
         , ( 51, ( 62, "Preponderance\nof the Small" ) )
-        , ( 52, ( 54, "The Marrying Maiden" ) )
+        , ( 52, ( 54, "The Marrying\nMaiden" ) )
         , ( 53, ( 40, "Deliverance" ) )
         , ( 54, ( 51, "Shock, Thunder" ) )
         , ( 55, ( 16, "Enthusiasm" ) )
