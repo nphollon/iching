@@ -300,7 +300,7 @@ signDetails =
         , ( 36, ( 58, "The Joyous" ) )
         , ( 37, ( 47, "Oppression" ) )
         , ( 38, ( 17, "Following" ) )
-        , ( 39, ( 45, "Gathering Together" ) )
+        , ( 39, ( 45, "Gathering\nTogether" ) )
         , ( 40, ( 5, "Waiting" ) )
         , ( 41, ( 48, "The Well" ) )
         , ( 42, ( 63, "Before Completion" ) )

@@ -9446,7 +9446,7 @@ var _user$project$Main$signDetails = _elm_lang$core$Dict$fromList(
 			{
 			ctor: '_Tuple2',
 			_0: 39,
-			_1: {ctor: '_Tuple2', _0: 45, _1: 'Gathering Together'}
+			_1: {ctor: '_Tuple2', _0: 45, _1: 'Gathering\nTogether'}
 		},
 			{
 			ctor: '_Tuple2',
