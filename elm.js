@@ -8931,7 +8931,9 @@ var _mgold$elm_random_pcg$Random_Pcg$initialSeed2 = F2(
 		return _mgold$elm_random_pcg$Random_Pcg$next(
 			A2(_mgold$elm_random_pcg$Random_Pcg$Seed, state2, incr));
 	});
-var _mgold$elm_random_pcg$Random_Pcg$initialSeed = _mgold$elm_random_pcg$Random_Pcg$initialSeed2(0);
+var _mgold$elm_random_pcg$Random_Pcg$initialSeed = function (i) {
+	return A2(_mgold$elm_random_pcg$Random_Pcg$initialSeed2, i, 0);
+};
 var _mgold$elm_random_pcg$Random_Pcg$integer = F2(
 	function (max, seed0) {
 		if (_elm_lang$core$Native_Utils.eq(
@@ -9092,8 +9094,8 @@ var _mgold$elm_random_pcg$Random_Pcg$frequency = function (pairs) {
 					return _elm_lang$core$Native_Utils.crashCase(
 						'Random.Pcg',
 						{
-							start: {line: 834, column: 13},
-							end: {line: 842, column: 77}
+							start: {line: 835, column: 13},
+							end: {line: 843, column: 77}
 						},
 						_p77)('Empty list passed to Random.Pcg.frequency!');
 				}
@@ -9294,12 +9296,12 @@ var _user$project$Main$signDetails = _elm_lang$core$Dict$fromList(
 			{
 			ctor: '_Tuple2',
 			_0: 9,
-			_1: {ctor: '_Tuple2', _0: -1, _1: ''}
+			_1: {ctor: '_Tuple2', _0: 57, _1: 'The Gentle'}
 		},
 			{
 			ctor: '_Tuple2',
 			_0: 10,
-			_1: {ctor: '_Tuple2', _0: -1, _1: ''}
+			_1: {ctor: '_Tuple2', _0: 37, _1: 'The Family'}
 		},
 			{
 			ctor: '_Tuple2',
@@ -9409,7 +9411,7 @@ var _user$project$Main$signDetails = _elm_lang$core$Dict$fromList(
 			{
 			ctor: '_Tuple2',
 			_0: 32,
-			_1: {ctor: '_Tuple2', _0: -1, _1: ''}
+			_1: {ctor: '_Tuple2', _0: 43, _1: 'Breakthrough'}
 		},
 			{
 			ctor: '_Tuple2',
@@ -9434,7 +9436,7 @@ var _user$project$Main$signDetails = _elm_lang$core$Dict$fromList(
 			{
 			ctor: '_Tuple2',
 			_0: 37,
-			_1: {ctor: '_Tuple2', _0: -1, _1: ''}
+			_1: {ctor: '_Tuple2', _0: 47, _1: 'Oppression'}
 		},
 			{
 			ctor: '_Tuple2',
@@ -9449,7 +9451,7 @@ var _user$project$Main$signDetails = _elm_lang$core$Dict$fromList(
 			{
 			ctor: '_Tuple2',
 			_0: 40,
-			_1: {ctor: '_Tuple2', _0: -1, _1: ''}
+			_1: {ctor: '_Tuple2', _0: 5, _1: 'Waiting'}
 		},
 			{
 			ctor: '_Tuple2',
@@ -9459,12 +9461,12 @@ var _user$project$Main$signDetails = _elm_lang$core$Dict$fromList(
 			{
 			ctor: '_Tuple2',
 			_0: 42,
-			_1: {ctor: '_Tuple2', _0: -1, _1: ''}
+			_1: {ctor: '_Tuple2', _0: 63, _1: 'Before Completion'}
 		},
 			{
 			ctor: '_Tuple2',
 			_0: 43,
-			_1: {ctor: '_Tuple2', _0: -1, _1: ''}
+			_1: {ctor: '_Tuple2', _0: 39, _1: 'Obstruction'}
 		},
 			{
 			ctor: '_Tuple2',
@@ -9509,7 +9511,7 @@ var _user$project$Main$signDetails = _elm_lang$core$Dict$fromList(
 			{
 			ctor: '_Tuple2',
 			_0: 52,
-			_1: {ctor: '_Tuple2', _0: -1, _1: ''}
+			_1: {ctor: '_Tuple2', _0: 54, _1: 'The Marrying Maiden'}
 		},
 			{
 			ctor: '_Tuple2',
@@ -9524,7 +9526,7 @@ var _user$project$Main$signDetails = _elm_lang$core$Dict$fromList(
 			{
 			ctor: '_Tuple2',
 			_0: 55,
-			_1: {ctor: '_Tuple2', _0: -1, _1: ''}
+			_1: {ctor: '_Tuple2', _0: 16, _1: 'Enthusiasm'}
 		},
 			{
 			ctor: '_Tuple2',
@@ -9559,7 +9561,7 @@ var _user$project$Main$signDetails = _elm_lang$core$Dict$fromList(
 			{
 			ctor: '_Tuple2',
 			_0: 62,
-			_1: {ctor: '_Tuple2', _0: -1, _1: ''}
+			_1: {ctor: '_Tuple2', _0: 24, _1: 'Return'}
 		},
 			{
 			ctor: '_Tuple2',
