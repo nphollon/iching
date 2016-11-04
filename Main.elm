@@ -7,26 +7,26 @@ import Html.App as App
 import Html.Events exposing (onClick)
 import Element exposing (Element)
 import Text
-import Random.Pcg as Rand
+import Random
 
 
 type Action
     = Refresh
+    | NewHex (List Line)
 
 
-type alias Model =
-    { seed : Rand.Seed
-    , hexagram : List Line
-    }
+type Model
+    = Waiting
+    | Hexagram (List Line)
 
 
 type alias Line =
     ( Bool, Bool )
 
 
-main : Program ( Int, Int )
+main : Program Never
 main =
-    App.programWithFlags
+    App.program
         { init = init
         , view = view
         , update = update
@@ -34,33 +34,26 @@ main =
         }
 
 
-init : ( Int, Int ) -> ( Model, Cmd a )
-init randomSeed =
-    generateHexagram (uncurry Rand.initialSeed2 randomSeed)
-        ! []
+init : ( Model, Cmd a )
+init =
+    Waiting ! []
 
 
-update : a -> Model -> ( Model, Cmd a )
-update _ model =
-    generateHexagram model.seed ! []
+update : Action -> Model -> ( Model, Cmd Action )
+update action model =
+    case action of
+        Refresh ->
+            ( model, Random.generate NewHex generator )
+
+        NewHex hex ->
+            Hexagram hex ! []
 
 
-generateHexagram : Rand.Seed -> Model
-generateHexagram seed =
-    let
-        ( hexagram, nextSeed ) =
-            Rand.step generator seed
-    in
-        { seed = nextSeed
-        , hexagram = hexagram
-        }
-
-
-generator : Rand.Generator (List Line)
+generator : Random.Generator (List Line)
 generator =
-    Rand.int 1 8
-        |> Rand.map toLine
-        |> Rand.list 6
+    Random.int 1 8
+        |> Random.map toLine
+        |> Random.list 6
 
 
 toLine : Int -> Line
@@ -96,10 +89,15 @@ toLine i =
 
 view : Model -> Html Action
 view model =
-    div []
-        [ drawHexagram model.hexagram
-        , button [ onClick Refresh ] [ text "Again" ]
-        ]
+    case model of
+        Waiting ->
+            button [ onClick Refresh ] [ text "Consult" ]
+
+        Hexagram hexagram ->
+            div []
+                [ drawHexagram hexagram
+                , button [ onClick Refresh ] [ text "Again" ]
+                ]
 
 
 drawHexagram : List Line -> Html a
