@@ -185,7 +185,7 @@ drawChanges changes =
 
         dot isChanging =
             if isChanging then
-                Element.color Color.red box
+                Element.color Color.yellow box
             else
                 box
     in
@@ -240,7 +240,7 @@ numberStyle : Text.Style
 numberStyle =
     { typeface = [ "sans-serif" ]
     , height = Just 20
-    , color = Color.red
+    , color = Color.yellow
     , bold = True
     , italic = False
     , line = Nothing

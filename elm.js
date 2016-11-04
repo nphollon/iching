@@ -9582,7 +9582,7 @@ var _user$project$Main$numberStyle = {
 	typeface: _elm_lang$core$Native_List.fromArray(
 		['sans-serif']),
 	height: _elm_lang$core$Maybe$Just(20),
-	color: _elm_lang$core$Color$red,
+	color: _elm_lang$core$Color$yellow,
 	bold: true,
 	italic: false,
 	line: _elm_lang$core$Maybe$Nothing
@@ -9628,7 +9628,7 @@ var _user$project$Main$backColor = _elm_lang$core$Color$black;
 var _user$project$Main$drawChanges = function (changes) {
 	var box = A2(_evancz$elm_graphics$Element$spacer, 12, 12);
 	var dot = function (isChanging) {
-		return isChanging ? A2(_evancz$elm_graphics$Element$color, _elm_lang$core$Color$red, box) : box;
+		return isChanging ? A2(_evancz$elm_graphics$Element$color, _elm_lang$core$Color$yellow, box) : box;
 	};
 	return A2(
 		_evancz$elm_graphics$Element$flow,
