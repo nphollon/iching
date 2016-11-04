@@ -6550,6 +6550,10 @@ return {
 
 }();
 
+var _elm_lang$core$Process$kill = _elm_lang$core$Native_Scheduler.kill;
+var _elm_lang$core$Process$sleep = _elm_lang$core$Native_Scheduler.sleep;
+var _elm_lang$core$Process$spawn = _elm_lang$core$Native_Scheduler.spawn;
+
 var _elm_lang$core$Random$onSelfMsg = F3(
 	function (_p1, _p0, seed) {
 		return _elm_lang$core$Task$succeed(seed);
@@ -6946,6 +6950,184 @@ var _elm_lang$core$Regex$AtMost = function (a) {
 	return {ctor: 'AtMost', _0: a};
 };
 var _elm_lang$core$Regex$All = {ctor: 'All'};
+
+var _elm_lang$dom$Native_Dom = function() {
+
+function on(node)
+{
+	return function(eventName, decoder, toTask)
+	{
+		return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+
+			function performTask(event)
+			{
+				var result = A2(_elm_lang$core$Json_Decode$decodeValue, decoder, event);
+				if (result.ctor === 'Ok')
+				{
+					_elm_lang$core$Native_Scheduler.rawSpawn(toTask(result._0));
+				}
+			}
+
+			node.addEventListener(eventName, performTask);
+
+			return function()
+			{
+				node.removeEventListener(eventName, performTask);
+			};
+		});
+	};
+}
+
+var rAF = typeof requestAnimationFrame !== 'undefined'
+	? requestAnimationFrame
+	: function(callback) { callback(); };
+
+function withNode(id, doStuff)
+{
+	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
+	{
+		rAF(function()
+		{
+			var node = document.getElementById(id);
+			if (node === null)
+			{
+				callback(_elm_lang$core$Native_Scheduler.fail({ ctor: 'NotFound', _0: id }));
+				return;
+			}
+			callback(_elm_lang$core$Native_Scheduler.succeed(doStuff(node)));
+		});
+	});
+}
+
+
+// FOCUS
+
+function focus(id)
+{
+	return withNode(id, function(node) {
+		node.focus();
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+function blur(id)
+{
+	return withNode(id, function(node) {
+		node.blur();
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+
+// SCROLLING
+
+function getScrollTop(id)
+{
+	return withNode(id, function(node) {
+		return node.scrollTop;
+	});
+}
+
+function setScrollTop(id, desiredScrollTop)
+{
+	return withNode(id, function(node) {
+		node.scrollTop = desiredScrollTop;
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+function toBottom(id)
+{
+	return withNode(id, function(node) {
+		node.scrollTop = node.scrollHeight;
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+function getScrollLeft(id)
+{
+	return withNode(id, function(node) {
+		return node.scrollLeft;
+	});
+}
+
+function setScrollLeft(id, desiredScrollLeft)
+{
+	return withNode(id, function(node) {
+		node.scrollLeft = desiredScrollLeft;
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+function toRight(id)
+{
+	return withNode(id, function(node) {
+		node.scrollLeft = node.scrollWidth;
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+
+// SIZE
+
+function width(options, id)
+{
+	return withNode(id, function(node) {
+		switch (options.ctor)
+		{
+			case 'Content':
+				return node.scrollWidth;
+			case 'VisibleContent':
+				return node.clientWidth;
+			case 'VisibleContentWithBorders':
+				return node.offsetWidth;
+			case 'VisibleContentWithBordersAndMargins':
+				var rect = node.getBoundingClientRect();
+				return rect.right - rect.left;
+		}
+	});
+}
+
+function height(options, id)
+{
+	return withNode(id, function(node) {
+		switch (options.ctor)
+		{
+			case 'Content':
+				return node.scrollHeight;
+			case 'VisibleContent':
+				return node.clientHeight;
+			case 'VisibleContentWithBorders':
+				return node.offsetHeight;
+			case 'VisibleContentWithBordersAndMargins':
+				var rect = node.getBoundingClientRect();
+				return rect.bottom - rect.top;
+		}
+	});
+}
+
+return {
+	onDocument: F3(on(document)),
+	onWindow: F3(on(window)),
+
+	focus: focus,
+	blur: blur,
+
+	getScrollTop: getScrollTop,
+	setScrollTop: F2(setScrollTop),
+	getScrollLeft: getScrollLeft,
+	setScrollLeft: F2(setScrollLeft),
+	toBottom: toBottom,
+	toRight: toRight,
+
+	height: F2(height),
+	width: F2(width)
+};
+
+}();
+
+var _elm_lang$dom$Dom_LowLevel$onWindow = _elm_lang$dom$Native_Dom.onWindow;
+var _elm_lang$dom$Dom_LowLevel$onDocument = _elm_lang$dom$Native_Dom.onDocument;
 
 //import Native.Json //
 
@@ -8674,6 +8856,128 @@ var _elm_lang$html$Html_Events$Options = F2(
 	function (a, b) {
 		return {stopPropagation: a, preventDefault: b};
 	});
+
+var _elm_lang$window$Native_Window = function()
+{
+
+var size = _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)	{
+	callback(_elm_lang$core$Native_Scheduler.succeed({
+		width: window.innerWidth,
+		height: window.innerHeight
+	}));
+});
+
+return {
+	size: size
+};
+
+}();
+var _elm_lang$window$Window_ops = _elm_lang$window$Window_ops || {};
+_elm_lang$window$Window_ops['&>'] = F2(
+	function (t1, t2) {
+		return A2(
+			_elm_lang$core$Task$andThen,
+			t1,
+			function (_p0) {
+				return t2;
+			});
+	});
+var _elm_lang$window$Window$onSelfMsg = F3(
+	function (router, dimensions, state) {
+		var _p1 = state;
+		if (_p1.ctor === 'Nothing') {
+			return _elm_lang$core$Task$succeed(state);
+		} else {
+			var send = function (_p2) {
+				var _p3 = _p2;
+				return A2(
+					_elm_lang$core$Platform$sendToApp,
+					router,
+					_p3._0(dimensions));
+			};
+			return A2(
+				_elm_lang$window$Window_ops['&>'],
+				_elm_lang$core$Task$sequence(
+					A2(_elm_lang$core$List$map, send, _p1._0.subs)),
+				_elm_lang$core$Task$succeed(state));
+		}
+	});
+var _elm_lang$window$Window$init = _elm_lang$core$Task$succeed(_elm_lang$core$Maybe$Nothing);
+var _elm_lang$window$Window$size = _elm_lang$window$Native_Window.size;
+var _elm_lang$window$Window$width = A2(
+	_elm_lang$core$Task$map,
+	function (_) {
+		return _.width;
+	},
+	_elm_lang$window$Window$size);
+var _elm_lang$window$Window$height = A2(
+	_elm_lang$core$Task$map,
+	function (_) {
+		return _.height;
+	},
+	_elm_lang$window$Window$size);
+var _elm_lang$window$Window$onEffects = F3(
+	function (router, newSubs, oldState) {
+		var _p4 = {ctor: '_Tuple2', _0: oldState, _1: newSubs};
+		if (_p4._0.ctor === 'Nothing') {
+			if (_p4._1.ctor === '[]') {
+				return _elm_lang$core$Task$succeed(_elm_lang$core$Maybe$Nothing);
+			} else {
+				return A2(
+					_elm_lang$core$Task$andThen,
+					_elm_lang$core$Process$spawn(
+						A3(
+							_elm_lang$dom$Dom_LowLevel$onWindow,
+							'resize',
+							_elm_lang$core$Json_Decode$succeed(
+								{ctor: '_Tuple0'}),
+							function (_p5) {
+								return A2(
+									_elm_lang$core$Task$andThen,
+									_elm_lang$window$Window$size,
+									_elm_lang$core$Platform$sendToSelf(router));
+							})),
+					function (pid) {
+						return _elm_lang$core$Task$succeed(
+							_elm_lang$core$Maybe$Just(
+								{subs: newSubs, pid: pid}));
+					});
+			}
+		} else {
+			if (_p4._1.ctor === '[]') {
+				return A2(
+					_elm_lang$window$Window_ops['&>'],
+					_elm_lang$core$Process$kill(_p4._0._0.pid),
+					_elm_lang$core$Task$succeed(_elm_lang$core$Maybe$Nothing));
+			} else {
+				return _elm_lang$core$Task$succeed(
+					_elm_lang$core$Maybe$Just(
+						{subs: newSubs, pid: _p4._0._0.pid}));
+			}
+		}
+	});
+var _elm_lang$window$Window$subscription = _elm_lang$core$Native_Platform.leaf('Window');
+var _elm_lang$window$Window$Size = F2(
+	function (a, b) {
+		return {width: a, height: b};
+	});
+var _elm_lang$window$Window$MySub = function (a) {
+	return {ctor: 'MySub', _0: a};
+};
+var _elm_lang$window$Window$resizes = function (tagger) {
+	return _elm_lang$window$Window$subscription(
+		_elm_lang$window$Window$MySub(tagger));
+};
+var _elm_lang$window$Window$subMap = F2(
+	function (func, _p6) {
+		var _p7 = _p6;
+		return _elm_lang$window$Window$MySub(
+			function (_p8) {
+				return func(
+					_p7._0(_p8));
+			});
+	});
+_elm_lang$core$Native_Platform.effectManagers['Window'] = {pkg: 'elm-lang/window', init: _elm_lang$window$Window$init, onEffects: _elm_lang$window$Window$onEffects, onSelfMsg: _elm_lang$window$Window$onSelfMsg, tag: 'sub', subMap: _elm_lang$window$Window$subMap};
 
 var _evancz$elm_graphics$Native_Element = function()
 {
@@ -10463,86 +10767,91 @@ var _user$project$Main$splitLine = F2(
 			_2: A2(_elm_lang$core$List_ops['::'], _p5, _p4._2)
 		};
 	});
-var _user$project$Main$drawHexagram = function (lines) {
-	var _p7 = A3(
-		_elm_lang$core$List$foldr,
-		_user$project$Main$splitLine,
-		{
-			ctor: '_Tuple3',
-			_0: _elm_lang$core$Native_List.fromArray(
-				[]),
-			_1: _elm_lang$core$Native_List.fromArray(
-				[]),
-			_2: _elm_lang$core$Native_List.fromArray(
-				[])
-		},
-		lines);
-	var before = _p7._0;
-	var changes = _p7._1;
-	var after = _p7._2;
-	var beforeGraphic = A4(
-		_evancz$elm_graphics$Element$container,
-		180,
-		250,
-		_evancz$elm_graphics$Element$topLeft,
-		A2(
+var _user$project$Main$drawHexagram = F2(
+	function (window, lines) {
+		var _p7 = A3(
+			_elm_lang$core$List$foldr,
+			_user$project$Main$splitLine,
+			{
+				ctor: '_Tuple3',
+				_0: _elm_lang$core$Native_List.fromArray(
+					[]),
+				_1: _elm_lang$core$Native_List.fromArray(
+					[]),
+				_2: _elm_lang$core$Native_List.fromArray(
+					[])
+			},
+			lines);
+		var before = _p7._0;
+		var changes = _p7._1;
+		var after = _p7._2;
+		var beforeGraphic = A4(
+			_evancz$elm_graphics$Element$container,
+			180,
+			250,
+			_evancz$elm_graphics$Element$topLeft,
+			A2(
+				_evancz$elm_graphics$Element$flow,
+				_evancz$elm_graphics$Element$down,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						A2(
+						_evancz$elm_graphics$Element$flow,
+						_evancz$elm_graphics$Element$right,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								A2(_evancz$elm_graphics$Element$spacer, 30, 1),
+								_user$project$Main$drawHalfHexagram(before),
+								A2(_evancz$elm_graphics$Element$spacer, 20, 1),
+								_user$project$Main$drawChanges(changes)
+							])),
+						A2(_evancz$elm_graphics$Element$spacer, 1, 20),
+						_user$project$Main$drawText(before)
+					])));
+		var afterGraphic = A4(
+			_evancz$elm_graphics$Element$container,
+			180,
+			250,
+			_evancz$elm_graphics$Element$topLeft,
+			A2(
+				_evancz$elm_graphics$Element$flow,
+				_evancz$elm_graphics$Element$down,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						A2(
+						_evancz$elm_graphics$Element$flow,
+						_evancz$elm_graphics$Element$right,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								A2(_evancz$elm_graphics$Element$spacer, 30, 1),
+								_user$project$Main$drawHalfHexagram(after)
+							])),
+						A2(_evancz$elm_graphics$Element$spacer, 1, 20),
+						_user$project$Main$drawText(after)
+					])));
+		var layout = (_elm_lang$core$Native_Utils.cmp(window.height, window.width) > 0) ? A2(
 			_evancz$elm_graphics$Element$flow,
 			_evancz$elm_graphics$Element$down,
 			_elm_lang$core$Native_List.fromArray(
 				[
-					A2(
-					_evancz$elm_graphics$Element$flow,
-					_evancz$elm_graphics$Element$right,
-					_elm_lang$core$Native_List.fromArray(
-						[
-							A2(_evancz$elm_graphics$Element$spacer, 30, 1),
-							_user$project$Main$drawHalfHexagram(before),
-							A2(_evancz$elm_graphics$Element$spacer, 20, 1),
-							_user$project$Main$drawChanges(changes)
-						])),
-					A2(_evancz$elm_graphics$Element$spacer, 1, 20),
-					_user$project$Main$drawText(before)
-				])));
-	var afterGraphic = A4(
-		_evancz$elm_graphics$Element$container,
-		180,
-		250,
-		_evancz$elm_graphics$Element$topLeft,
-		A2(
+					beforeGraphic,
+					A2(_evancz$elm_graphics$Element$spacer, 60, 1),
+					afterGraphic
+				])) : A2(
 			_evancz$elm_graphics$Element$flow,
-			_evancz$elm_graphics$Element$down,
+			_evancz$elm_graphics$Element$right,
 			_elm_lang$core$Native_List.fromArray(
 				[
-					A2(
-					_evancz$elm_graphics$Element$flow,
-					_evancz$elm_graphics$Element$right,
-					_elm_lang$core$Native_List.fromArray(
-						[
-							A2(_evancz$elm_graphics$Element$spacer, 30, 1),
-							_user$project$Main$drawHalfHexagram(after)
-						])),
-					A2(_evancz$elm_graphics$Element$spacer, 1, 20),
-					_user$project$Main$drawText(after)
-				])));
-	return _evancz$elm_graphics$Element$toHtml(
-		A2(
-			_evancz$elm_graphics$Element$color,
-			_user$project$Main$backColor,
-			A4(
-				_evancz$elm_graphics$Element$container,
-				500,
-				300,
-				_evancz$elm_graphics$Element$bottomRight,
-				A2(
-					_evancz$elm_graphics$Element$flow,
-					_evancz$elm_graphics$Element$right,
-					_elm_lang$core$Native_List.fromArray(
-						[
-							beforeGraphic,
-							A2(_evancz$elm_graphics$Element$spacer, 60, 1),
-							afterGraphic
-						])))));
-};
+					beforeGraphic,
+					A2(_evancz$elm_graphics$Element$spacer, 60, 1),
+					afterGraphic
+				]));
+		return _evancz$elm_graphics$Element$toHtml(
+			A2(
+				_evancz$elm_graphics$Element$color,
+				_user$project$Main$backColor,
+				A4(_evancz$elm_graphics$Element$container, ((window.width * 90) / 100) | 0, ((window.height * 90) / 100) | 0, _evancz$elm_graphics$Element$middle, layout)));
+	});
 var _user$project$Main$toLine = function (i) {
 	var _p8 = i;
 	switch (_p8) {
@@ -10566,8 +10875,8 @@ var _user$project$Main$toLine = function (i) {
 			return _elm_lang$core$Native_Utils.crashCase(
 				'Main',
 				{
-					start: {line: 61, column: 5},
-					end: {line: 87, column: 39}
+					start: {line: 90, column: 5},
+					end: {line: 116, column: 39}
 				},
 				_p8)('Out of range');
 	}
@@ -10582,10 +10891,16 @@ var _user$project$Main$generator = A2(
 var _user$project$Main$NewHex = function (a) {
 	return {ctor: 'NewHex', _0: a};
 };
+var _user$project$Main$WindowSize = function (a) {
+	return {ctor: 'WindowSize', _0: a};
+};
+var _user$project$Main$subscriptions = function (_p10) {
+	return _elm_lang$window$Window$resizes(_user$project$Main$WindowSize);
+};
 var _user$project$Main$Refresh = {ctor: 'Refresh'};
 var _user$project$Main$view = function (model) {
-	var _p10 = model;
-	if (_p10.ctor === 'Waiting') {
+	var _p11 = model;
+	if (_p11.ctor === 'Emptiness') {
 		return A2(
 			_elm_lang$html$Html$button,
 			_elm_lang$core$Native_List.fromArray(
@@ -10603,7 +10918,7 @@ var _user$project$Main$view = function (model) {
 				[]),
 			_elm_lang$core$Native_List.fromArray(
 				[
-					_user$project$Main$drawHexagram(_p10._0),
+					A2(_user$project$Main$drawHexagram, _p11._0.window, _p11._0.hexagram),
 					A2(
 					_elm_lang$html$Html$button,
 					_elm_lang$core$Native_List.fromArray(
@@ -10620,37 +10935,70 @@ var _user$project$Main$view = function (model) {
 var _user$project$Main$Hexagram = function (a) {
 	return {ctor: 'Hexagram', _0: a};
 };
+var _user$project$Main$Emptiness = function (a) {
+	return {ctor: 'Emptiness', _0: a};
+};
+var _user$project$Main$init = function () {
+	var defaultSize = {width: 0, height: 0};
+	var error = function (_p12) {
+		return _user$project$Main$WindowSize(defaultSize);
+	};
+	return {
+		ctor: '_Tuple2',
+		_0: _user$project$Main$Emptiness(defaultSize),
+		_1: A3(_elm_lang$core$Task$perform, error, _user$project$Main$WindowSize, _elm_lang$window$Window$size)
+	};
+}();
 var _user$project$Main$update = F2(
 	function (action, model) {
-		var _p11 = action;
-		if (_p11.ctor === 'Refresh') {
-			return {
-				ctor: '_Tuple2',
-				_0: model,
-				_1: A2(_elm_lang$core$Random$generate, _user$project$Main$NewHex, _user$project$Main$generator)
-			};
-		} else {
-			return A2(
-				_elm_lang$core$Platform_Cmd_ops['!'],
-				_user$project$Main$Hexagram(_p11._0),
-				_elm_lang$core$Native_List.fromArray(
-					[]));
+		var _p13 = {ctor: '_Tuple2', _0: action, _1: model};
+		switch (_p13._0.ctor) {
+			case 'Refresh':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: A2(_elm_lang$core$Random$generate, _user$project$Main$NewHex, _user$project$Main$generator)
+				};
+			case 'WindowSize':
+				if (_p13._1.ctor === 'Emptiness') {
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
+						_user$project$Main$Emptiness(_p13._0._0),
+						_elm_lang$core$Native_List.fromArray(
+							[]));
+				} else {
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
+						_user$project$Main$Hexagram(
+							_elm_lang$core$Native_Utils.update(
+								_p13._1._0,
+								{window: _p13._0._0})),
+						_elm_lang$core$Native_List.fromArray(
+							[]));
+				}
+			default:
+				if (_p13._1.ctor === 'Emptiness') {
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
+						_user$project$Main$Hexagram(
+							{hexagram: _p13._0._0, window: _p13._1._0}),
+						_elm_lang$core$Native_List.fromArray(
+							[]));
+				} else {
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
+						_user$project$Main$Hexagram(
+							_elm_lang$core$Native_Utils.update(
+								_p13._1._0,
+								{hexagram: _p13._0._0})),
+						_elm_lang$core$Native_List.fromArray(
+							[]));
+				}
 		}
 	});
-var _user$project$Main$Waiting = {ctor: 'Waiting'};
-var _user$project$Main$init = A2(
-	_elm_lang$core$Platform_Cmd_ops['!'],
-	_user$project$Main$Waiting,
-	_elm_lang$core$Native_List.fromArray(
-		[]));
 var _user$project$Main$main = {
 	main: _elm_lang$html$Html_App$program(
-		{
-			init: _user$project$Main$init,
-			view: _user$project$Main$view,
-			update: _user$project$Main$update,
-			subscriptions: _elm_lang$core$Basics$always(_elm_lang$core$Platform_Sub$none)
-		})
+		{init: _user$project$Main$init, view: _user$project$Main$view, update: _user$project$Main$update, subscriptions: _user$project$Main$subscriptions})
 };
 
 var Elm = {};

@@ -1,23 +1,29 @@
 module Main exposing (main)
 
-import Dict exposing (Dict)
 import Color exposing (Color)
+import Dict exposing (Dict)
+import Random
+import Task
 import Html exposing (..)
 import Html.App as App
 import Html.Events exposing (onClick)
 import Element exposing (Element)
 import Text
-import Random
+import Window
 
 
 type Action
     = Refresh
+    | WindowSize Window.Size
     | NewHex (List Line)
 
 
 type Model
-    = Waiting
-    | Hexagram (List Line)
+    = Emptiness Window.Size
+    | Hexagram
+        { hexagram : List Line
+        , window : Window.Size
+        }
 
 
 type alias Line =
@@ -30,23 +36,46 @@ main =
         { init = init
         , view = view
         , update = update
-        , subscriptions = always Sub.none
+        , subscriptions = subscriptions
         }
 
 
-init : ( Model, Cmd a )
+init : ( Model, Cmd Action )
 init =
-    Waiting ! []
+    let
+        defaultSize =
+            { width = 0, height = 0 }
+
+        error _ =
+            WindowSize defaultSize
+    in
+        ( Emptiness defaultSize
+        , Task.perform error WindowSize Window.size
+        )
+
+
+subscriptions : Model -> Sub Action
+subscriptions _ =
+    Window.resizes WindowSize
 
 
 update : Action -> Model -> ( Model, Cmd Action )
 update action model =
-    case action of
-        Refresh ->
+    case ( action, model ) of
+        ( Refresh, _ ) ->
             ( model, Random.generate NewHex generator )
 
-        NewHex hex ->
-            Hexagram hex ! []
+        ( WindowSize window, Emptiness _ ) ->
+            Emptiness window ! []
+
+        ( WindowSize window, Hexagram m ) ->
+            Hexagram { m | window = window } ! []
+
+        ( NewHex hex, Emptiness window ) ->
+            Hexagram { hexagram = hex, window = window } ! []
+
+        ( NewHex hex, Hexagram m ) ->
+            Hexagram { m | hexagram = hex } ! []
 
 
 generator : Random.Generator (List Line)
@@ -90,18 +119,18 @@ toLine i =
 view : Model -> Html Action
 view model =
     case model of
-        Waiting ->
+        Emptiness window ->
             button [ onClick Refresh ] [ text "Consult" ]
 
-        Hexagram hexagram ->
+        Hexagram { window, hexagram } ->
             div []
-                [ drawHexagram hexagram
+                [ drawHexagram window hexagram
                 , button [ onClick Refresh ] [ text "Again" ]
                 ]
 
 
-drawHexagram : List Line -> Html a
-drawHexagram lines =
+drawHexagram : Window.Size -> List Line -> Html a
+drawHexagram window lines =
     let
         ( before, changes, after ) =
             List.foldr splitLine ( [], [], [] ) lines
@@ -129,13 +158,26 @@ drawHexagram lines =
             ]
                 |> Element.flow Element.down
                 |> Element.container 180 250 Element.topLeft
+
+        layout =
+            if window.height > window.width then
+                Element.flow Element.down
+                    [ beforeGraphic
+                    , Element.spacer 60 1
+                    , afterGraphic
+                    ]
+            else
+                Element.flow Element.right
+                    [ beforeGraphic
+                    , Element.spacer 60 1
+                    , afterGraphic
+                    ]
     in
-        [ beforeGraphic
-        , Element.spacer 60 1
-        , afterGraphic
-        ]
-            |> Element.flow Element.right
-            |> Element.container 500 300 Element.bottomRight
+        layout
+            |> Element.container
+                (window.width * 90 // 100)
+                (window.height * 90 // 100)
+                Element.middle
             |> Element.color backColor
             |> Element.toHtml
 
