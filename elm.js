@@ -9713,7 +9713,7 @@ var _user$project$Main$drawText = function (halfLines) {
 						_elm_lang$svg$Svg_Attributes$fontSize('11'),
 						_elm_lang$svg$Svg_Attributes$fontStyle('italic'),
 						_elm_lang$svg$Svg_Attributes$fill('white'),
-						_elm_lang$svg$Svg_Attributes$x('0'),
+						_elm_lang$svg$Svg_Attributes$x('5'),
 						_elm_lang$svg$Svg_Attributes$y(y)
 					]),
 				_elm_lang$core$Native_List.fromArray(
@@ -9742,11 +9742,11 @@ var _user$project$Main$drawText = function (halfLines) {
 		_elm_lang$core$Native_List.fromArray(
 			[
 				_elm_lang$svg$Svg_Attributes$fontFamily('sans-serif'),
-				_elm_lang$svg$Svg_Attributes$fontSize('13'),
+				_elm_lang$svg$Svg_Attributes$fontSize('11'),
 				_elm_lang$svg$Svg_Attributes$fontWeight('bold'),
 				_elm_lang$svg$Svg_Attributes$fill('yellow'),
-				_elm_lang$svg$Svg_Attributes$x('0'),
-				_elm_lang$svg$Svg_Attributes$y('110')
+				_elm_lang$svg$Svg_Attributes$x('5'),
+				_elm_lang$svg$Svg_Attributes$y('105')
 			]),
 		_elm_lang$core$Native_List.fromArray(
 			[
@@ -9834,7 +9834,7 @@ var _user$project$Main$drawHexagram = F2(
 				_elm_lang$svg$Svg_Attributes$width(
 				_elm_lang$core$Basics$toString(((window.width * 9) / 10) | 0)),
 				_elm_lang$svg$Svg_Attributes$height(
-				_elm_lang$core$Basics$toString(((window.height * 4) / 10) | 0)),
+				_elm_lang$core$Basics$toString(((window.height * 5) / 11) | 0)),
 				_elm_lang$svg$Svg_Attributes$viewBox('0 0 120 150')
 			]);
 		var flex = landscape ? _elm_lang$core$Native_List.fromArray(
@@ -9846,8 +9846,7 @@ var _user$project$Main$drawHexagram = F2(
 				{ctor: '_Tuple2', _0: 'display', _1: 'flex'},
 				{ctor: '_Tuple2', _0: 'flex-direction', _1: 'column'},
 				{ctor: '_Tuple2', _0: 'justify-content', _1: 'space-around'},
-				{ctor: '_Tuple2', _0: 'align-items', _1: 'center'},
-				{ctor: '_Tuple2', _0: 'height', _1: '100%'}
+				{ctor: '_Tuple2', _0: 'align-items', _1: 'center'}
 			]);
 		var _p7 = A3(
 			_elm_lang$core$List$foldr,

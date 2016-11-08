@@ -144,7 +144,7 @@ drawHexagram window lines =
                 ]
             else
                 [ Attr.width <| toString <| window.width * 9 // 10
-                , Attr.height <| toString <| window.height * 4 // 10
+                , Attr.height <| toString <| window.height * 5 // 11
                 , Attr.viewBox "0 0 120 150"
                 ]
 
@@ -170,7 +170,6 @@ drawHexagram window lines =
                 , ( "flex-direction", "column" )
                 , ( "justify-content", "space-around" )
                 , ( "align-items", "center" )
-                , ( "height", "100%" )
                 ]
     in
         Html.div [ style flex ]
@@ -240,11 +239,11 @@ drawText halfLines =
         numberLine =
             Svg.text'
                 [ Attr.fontFamily "sans-serif"
-                , Attr.fontSize "13"
+                , Attr.fontSize "11"
                 , Attr.fontWeight "bold"
                 , Attr.fill "yellow"
-                , Attr.x "0"
-                , Attr.y "110"
+                , Attr.x "5"
+                , Attr.y "105"
                 ]
                 [ Svg.text (toString number) ]
 
@@ -254,7 +253,7 @@ drawText halfLines =
                 , Attr.fontSize "11"
                 , Attr.fontStyle "italic"
                 , Attr.fill "white"
-                , Attr.x "0"
+                , Attr.x "5"
                 , Attr.y y
                 ]
                 [ Svg.text text ]
