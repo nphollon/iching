@@ -1,14 +1,15 @@
 module Main exposing (main)
 
-import Color exposing (Color)
 import Dict exposing (Dict)
 import Random
+import String
 import Task
 import Html exposing (..)
 import Html.App as App
+import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
-import Element exposing (Element)
-import Text
+import Svg exposing (Svg)
+import Svg.Attributes as Attr
 import Window
 
 
@@ -123,10 +124,7 @@ view model =
             button [ onClick Refresh ] [ text "Consult" ]
 
         Hexagram { window, hexagram } ->
-            div []
-                [ drawHexagram window hexagram
-                , button [ onClick Refresh ] [ text "Again" ]
-                ]
+            drawHexagram window hexagram
 
 
 drawHexagram : Window.Size -> List Line -> Html a
@@ -135,51 +133,50 @@ drawHexagram window lines =
         ( before, changes, after ) =
             List.foldr splitLine ( [], [], [] ) lines
 
-        beforeGraphic =
-            [ Element.flow Element.right
-                [ Element.spacer 30 1
-                , drawHalfHexagram before
-                , Element.spacer 20 1
-                , drawChanges changes
+        landscape =
+            window.height < window.width
+
+        positionAttrs =
+            if landscape then
+                [ Attr.height <| toString <| window.height * 9 // 10
+                , Attr.width <| toString <| window.width * 4 // 10
+                , Attr.viewBox "0 0 120 150"
                 ]
-            , Element.spacer 1 20
-            , drawText before
-            ]
-                |> Element.flow Element.down
-                |> Element.container 180 250 Element.topLeft
+            else
+                [ Attr.width <| toString <| window.width * 9 // 10
+                , Attr.height <| toString <| window.height * 4 // 10
+                , Attr.viewBox "0 0 120 150"
+                ]
+
+        beforeGraphic =
+            Svg.svg positionAttrs
+                [ drawHalfHexagram before
+                , drawText before
+                ]
 
         afterGraphic =
-            [ Element.flow Element.right
-                [ Element.spacer 30 1
-                , drawHalfHexagram after
+            Svg.svg positionAttrs
+                [ drawHalfHexagram after
+                , drawText after
                 ]
-            , Element.spacer 1 20
-            , drawText after
-            ]
-                |> Element.flow Element.down
-                |> Element.container 180 250 Element.topLeft
 
-        layout =
-            if window.height > window.width then
-                Element.flow Element.down
-                    [ beforeGraphic
-                    , Element.spacer 60 1
-                    , afterGraphic
-                    ]
+        flex =
+            if landscape then
+                [ ( "display", "flex" )
+                , ( "justify-content", "space-around" )
+                ]
             else
-                Element.flow Element.right
-                    [ beforeGraphic
-                    , Element.spacer 60 1
-                    , afterGraphic
-                    ]
+                [ ( "display", "flex" )
+                , ( "flex-direction", "column" )
+                , ( "justify-content", "space-around" )
+                , ( "align-items", "center" )
+                , ( "height", "100%" )
+                ]
     in
-        layout
-            |> Element.container
-                (window.width * 90 // 100)
-                (window.height * 90 // 100)
-                Element.middle
-            |> Element.color backColor
-            |> Element.toHtml
+        Html.div [ style flex ]
+            [ beforeGraphic
+            , afterGraphic
+            ]
 
 
 type alias Triple a =
@@ -194,57 +191,34 @@ splitLine ( before, after ) ( befores, changes, afters ) =
     )
 
 
-drawHalfHexagram : List Bool -> Element
+drawHalfHexagram : List Bool -> Svg a
 drawHalfHexagram halfLines =
-    List.map drawHalfLine halfLines
-        |> List.intersperse (Element.spacer 1 10)
-        |> Element.flow Element.down
+    List.indexedMap drawHalfLine halfLines
+        |> Svg.g [ Attr.fill "white" ]
 
 
-drawHalfLine : Bool -> Element
-drawHalfLine isYang =
-    if isYang then
-        Element.color foreColor (Element.spacer 70 10)
-    else
-        let
-            halfBar =
-                Element.color foreColor (Element.spacer 25 10)
-        in
-            Element.flow Element.left
-                [ halfBar
-                , Element.spacer 20 1
-                , halfBar
+drawHalfLine : Int -> Bool -> Svg a
+drawHalfLine index isYang =
+    let
+        rect x width =
+            Svg.rect
+                [ Attr.y <| toString <| 15 * index + 5
+                , Attr.height "9"
+                , Attr.x <| toString x
+                , Attr.width <| toString width
+                ]
+                []
+    in
+        if isYang then
+            rect 20 60
+        else
+            Svg.g []
+                [ rect 20 25
+                , rect 55 25
                 ]
 
 
-drawChanges : List Bool -> Element
-drawChanges changes =
-    let
-        box =
-            Element.spacer 12 12
-
-        dot isChanging =
-            if isChanging then
-                Element.color Color.yellow box
-            else
-                box
-    in
-        List.map dot changes
-            |> List.intersperse (Element.spacer 1 8)
-            |> Element.flow Element.down
-
-
-backColor : Color
-backColor =
-    Color.black
-
-
-foreColor : Color
-foreColor =
-    Color.white
-
-
-drawText : List Bool -> Element
+drawText : List Bool -> Svg a
 drawText halfLines =
     let
         fromBinary =
@@ -262,40 +236,34 @@ drawText halfLines =
         ( number, name ) =
             Dict.get fromBinary signDetails
                 |> Maybe.withDefault ( -1, "" )
+
+        numberLine =
+            Svg.text'
+                [ Attr.fontFamily "sans-serif"
+                , Attr.fontSize "13"
+                , Attr.fontWeight "bold"
+                , Attr.fill "yellow"
+                , Attr.x "0"
+                , Attr.y "110"
+                ]
+                [ Svg.text (toString number) ]
+
+        titleLine y text =
+            Svg.text'
+                [ Attr.fontFamily "serif"
+                , Attr.fontSize "11"
+                , Attr.fontStyle "italic"
+                , Attr.fill "white"
+                , Attr.x "0"
+                , Attr.y y
+                ]
+                [ Svg.text text ]
+
+        title =
+            String.lines name
+                |> List.map2 titleLine [ "125", "140" ]
     in
-        [ toString number
-            |> Text.fromString
-            |> Text.style numberStyle
-            |> Element.leftAligned
-        , Element.spacer 1 10
-        , name
-            |> Text.fromString
-            |> Text.style nameStyle
-            |> Element.leftAligned
-        ]
-            |> Element.flow Element.down
-
-
-numberStyle : Text.Style
-numberStyle =
-    { typeface = [ "sans-serif" ]
-    , height = Just 20
-    , color = Color.yellow
-    , bold = True
-    , italic = False
-    , line = Nothing
-    }
-
-
-nameStyle : Text.Style
-nameStyle =
-    { typeface = [ "serif" ]
-    , height = Just 18
-    , color = Color.white
-    , bold = False
-    , italic = True
-    , line = Nothing
-    }
+        Svg.g [] <| numberLine :: title
 
 
 signDetails : Dict Int ( Int, String )
