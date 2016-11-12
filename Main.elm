@@ -11,16 +11,21 @@ import Html.Events exposing (onClick)
 import Svg exposing (Svg)
 import Svg.Attributes as Attr
 import Window
+import AnimationFrame
 
 
 type Action
     = Refresh
     | WindowSize Window.Size
+    | Tick Float
     | NewHex (List Line)
 
 
 type Model
-    = Emptiness Window.Size
+    = Emptiness
+        { time : Int
+        , window : Window.Size
+        }
     | Hexagram
         { hexagram : List Line
         , window : Window.Size
@@ -50,14 +55,20 @@ init =
         error _ =
             WindowSize defaultSize
     in
-        ( Emptiness defaultSize
+        ( Emptiness
+            { window = defaultSize
+            , time = 0
+            }
         , Task.perform error WindowSize Window.size
         )
 
 
 subscriptions : Model -> Sub Action
 subscriptions _ =
-    Window.resizes WindowSize
+    Sub.batch
+        [ Window.resizes WindowSize
+        , AnimationFrame.diffs Tick
+        ]
 
 
 update : Action -> Model -> ( Model, Cmd Action )
@@ -66,17 +77,20 @@ update action model =
         ( Refresh, _ ) ->
             ( model, Random.generate NewHex generator )
 
-        ( WindowSize window, Emptiness _ ) ->
-            Emptiness window ! []
+        ( WindowSize window, Emptiness m ) ->
+            Emptiness { m | window = window } ! []
 
         ( WindowSize window, Hexagram m ) ->
             Hexagram { m | window = window } ! []
 
-        ( NewHex hex, Emptiness window ) ->
-            Hexagram { hexagram = hex, window = window } ! []
+        ( NewHex hex, Emptiness m ) ->
+            Hexagram { hexagram = hex, window = m.window } ! []
 
         ( NewHex hex, Hexagram m ) ->
             Hexagram { m | hexagram = hex } ! []
+
+        _ ->
+            model ! []
 
 
 generator : Random.Generator (List Line)
