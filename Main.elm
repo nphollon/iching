@@ -5,7 +5,6 @@ import Random
 import String
 import Task
 import Html exposing (..)
-import Html.App as App
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Svg exposing (Svg)
@@ -36,9 +35,9 @@ type alias Line =
     ( Bool, Bool )
 
 
-main : Program Never
+main : Program Never Model Action
 main =
-    App.program
+    program
         { init = init
         , view = view
         , update = update
@@ -59,7 +58,7 @@ init =
             { window = defaultSize
             , time = 0
             }
-        , Task.perform error WindowSize Window.size
+        , Task.perform WindowSize Window.size
         )
 
 
@@ -251,7 +250,7 @@ drawText halfLines =
                 |> Maybe.withDefault ( -1, "" )
 
         numberLine =
-            Svg.text'
+            Svg.text_
                 [ Attr.fontFamily "sans-serif"
                 , Attr.fontSize "11"
                 , Attr.fontWeight "bold"
@@ -262,7 +261,7 @@ drawText halfLines =
                 [ Svg.text (toString number) ]
 
         titleLine y text =
-            Svg.text'
+            Svg.text_
                 [ Attr.fontFamily "serif"
                 , Attr.fontSize "11"
                 , Attr.fontStyle "italic"
