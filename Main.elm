@@ -1,12 +1,13 @@
 module Main exposing (main)
 
+import Array.Hamt as Array exposing (Array)
 import Dict exposing (Dict)
 import Random
 import String
 import Task
 import Html exposing (..)
 import Html.Attributes exposing (style)
-import Html.Events exposing (onClick)
+import Svg.Events exposing (onClick)
 import Svg exposing (Svg)
 import Svg.Attributes as Attr
 import Window
@@ -174,18 +175,52 @@ drawConsultButton window time =
                 , Attr.height <| toString <| window.height * 9 // 10
                 , Attr.viewBox "0 0 120 120"
                 ]
-                [ Svg.circle
-                    [ Attr.cx "60"
-                    , Attr.cy "60"
-                    , Attr.r "12"
-                    , onClick Consult
-                    ]
-                    []
-                , Svg.circle
-                    (coords ++ [ Attr.r "5", Attr.fill "white" ])
-                    []
-                ]
+                (amplitudes time
+                    ++ [ Svg.circle
+                            [ Attr.cx "60"
+                            , Attr.cy "60"
+                            , Attr.r "15"
+                            , Attr.fill "none"
+                            , Attr.pointerEvents "visible"
+                            , onClick Consult
+                            ]
+                            []
+                       ]
+                )
             ]
+
+
+amplitudes : Int -> List (Svg a)
+amplitudes t =
+    Array.toList <|
+        Array.initialize 13 <|
+            \i ->
+                let
+                    baseRadius =
+                        if i % 2 == 0 then
+                            28.5 - 2 * toFloat i
+                        else
+                            28 - 2 * (toFloat i)
+
+                    radius =
+                        if i % 2 == 0 then
+                            baseRadius
+                        else
+                            baseRadius + sin (0.1 * toFloat t + 0.3 * toFloat i)
+
+                    color =
+                        if i % 2 == 0 then
+                            "black"
+                        else
+                            "white"
+                in
+                    Svg.circle
+                        [ Attr.cx "60"
+                        , Attr.cy "60"
+                        , Attr.fill color
+                        , Attr.r (toString radius)
+                        ]
+                        []
 
 
 drawHexagram : Window.Size -> List Line -> Html a
