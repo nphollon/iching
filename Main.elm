@@ -11,10 +11,11 @@ import Svg exposing (Svg)
 import Svg.Attributes as Attr
 import Window
 import AnimationFrame
+import Clock exposing (Clock)
 
 
 type Action
-    = Refresh
+    = Consult
     | WindowSize Window.Size
     | Tick Float
     | NewHex (List Line)
@@ -22,7 +23,8 @@ type Action
 
 type Model
     = Emptiness
-        { time : Int
+        { clock : Clock
+        , time : Int
         , window : Window.Size
         }
     | Hexagram
@@ -56,6 +58,7 @@ init =
     in
         ( Emptiness
             { window = defaultSize
+            , clock = Clock.withPeriod 100
             , time = 0
             }
         , Task.perform WindowSize Window.size
@@ -73,7 +76,7 @@ subscriptions _ =
 update : Action -> Model -> ( Model, Cmd Action )
 update action model =
     case ( action, model ) of
-        ( Refresh, _ ) ->
+        ( Consult, _ ) ->
             ( model, Random.generate NewHex generator )
 
         ( WindowSize window, Emptiness m ) ->
@@ -87,6 +90,13 @@ update action model =
 
         ( NewHex hex, Hexagram m ) ->
             Hexagram { m | hexagram = hex } ! []
+
+        ( Tick dt, Emptiness m ) ->
+            let
+                ( clock, time ) =
+                    Clock.update always dt m.clock m.time
+            in
+                Emptiness { m | clock = clock, time = time } ! []
 
         _ ->
             model ! []
@@ -133,11 +143,49 @@ toLine i =
 view : Model -> Html Action
 view model =
     case model of
-        Emptiness window ->
-            button [ onClick Refresh ] [ text "Consult" ]
+        Emptiness { window, time } ->
+            drawConsultButton window time
 
         Hexagram { window, hexagram } ->
             drawHexagram window hexagram
+
+
+drawConsultButton : Window.Size -> Int -> Html Action
+drawConsultButton window time =
+    let
+        coords =
+            case time % 4 of
+                1 ->
+                    [ Attr.cx "67", Attr.cy "60" ]
+
+                2 ->
+                    [ Attr.cx "60", Attr.cy "67" ]
+
+                3 ->
+                    [ Attr.cx "53", Attr.cy "60" ]
+
+                _ ->
+                    [ Attr.cx "60", Attr.cy "53" ]
+    in
+        Html.div
+            [ style [ ( "display", "flex" ), ( "justify-content", "center" ) ] ]
+            [ Svg.svg
+                [ Attr.width <| toString <| window.width * 9 // 10
+                , Attr.height <| toString <| window.height * 9 // 10
+                , Attr.viewBox "0 0 120 120"
+                ]
+                [ Svg.circle
+                    [ Attr.cx "60"
+                    , Attr.cy "60"
+                    , Attr.r "12"
+                    , onClick Consult
+                    ]
+                    []
+                , Svg.circle
+                    (coords ++ [ Attr.r "5", Attr.fill "white" ])
+                    []
+                ]
+            ]
 
 
 drawHexagram : Window.Size -> List Line -> Html a

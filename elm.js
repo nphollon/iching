@@ -9864,6 +9864,62 @@ var _elm_lang$window$Window$subMap = F2(
 	});
 _elm_lang$core$Native_Platform.effectManagers['Window'] = {pkg: 'elm-lang/window', init: _elm_lang$window$Window$init, onEffects: _elm_lang$window$Window$onEffects, onSelfMsg: _elm_lang$window$Window$onSelfMsg, tag: 'sub', subMap: _elm_lang$window$Window$subMap};
 
+var _nphollon$update_clock$Clock$Clock = function (a) {
+	return {ctor: 'Clock', _0: a};
+};
+var _nphollon$update_clock$Clock$withPeriod = function (period) {
+	return _nphollon$update_clock$Clock$Clock(
+		{lag: 0, time: 0, period: period});
+};
+var _nphollon$update_clock$Clock$setPeriod = F2(
+	function (period, _p0) {
+		var _p1 = _p0;
+		return _nphollon$update_clock$Clock$Clock(
+			_elm_lang$core$Native_Utils.update(
+				_p1._0,
+				{period: period}));
+	});
+var _nphollon$update_clock$Clock$update = F4(
+	function (up, dt, _p2, model) {
+		var _p3 = _p2;
+		var _p8 = _p3._0;
+		var reduceLag = function (_p4) {
+			reduceLag:
+			while (true) {
+				var _p5 = _p4;
+				var _p7 = _p5._1;
+				var _p6 = _p5._0._0;
+				if (_elm_lang$core$Native_Utils.cmp(_p6.lag, _p6.period) < 0) {
+					return {
+						ctor: '_Tuple2',
+						_0: _nphollon$update_clock$Clock$Clock(_p6),
+						_1: _p7
+					};
+				} else {
+					var _v3 = {
+						ctor: '_Tuple2',
+						_0: _nphollon$update_clock$Clock$Clock(
+							_elm_lang$core$Native_Utils.update(
+								_p6,
+								{lag: _p6.lag - _p6.period, time: _p6.time + 1})),
+						_1: A2(up, _p6.time + 1, _p7)
+					};
+					_p4 = _v3;
+					continue reduceLag;
+				}
+			}
+		};
+		return reduceLag(
+			{
+				ctor: '_Tuple2',
+				_0: _nphollon$update_clock$Clock$Clock(
+					_elm_lang$core$Native_Utils.update(
+						_p8,
+						{lag: _p8.lag + dt})),
+				_1: model
+			});
+	});
+
 var _user$project$Main$signDetails = _elm_lang$core$Dict$fromList(
 	{
 		ctor: '::',
@@ -10706,8 +10762,8 @@ var _user$project$Main$toLine = function (i) {
 			return _elm_lang$core$Native_Utils.crashCase(
 				'Main',
 				{
-					start: {line: 104, column: 5},
-					end: {line: 130, column: 39}
+					start: {line: 114, column: 5},
+					end: {line: 140, column: 39}
 				},
 				_p8)('Out of range');
 	}
@@ -10740,24 +10796,140 @@ var _user$project$Main$subscriptions = function (_p10) {
 			}
 		});
 };
-var _user$project$Main$Refresh = {ctor: 'Refresh'};
-var _user$project$Main$view = function (model) {
-	var _p11 = model;
-	if (_p11.ctor === 'Emptiness') {
+var _user$project$Main$Consult = {ctor: 'Consult'};
+var _user$project$Main$drawConsultButton = F2(
+	function (window, time) {
+		var coords = function () {
+			var _p11 = A2(_elm_lang$core$Basics_ops['%'], time, 4);
+			switch (_p11) {
+				case 1:
+					return {
+						ctor: '::',
+						_0: _elm_lang$svg$Svg_Attributes$cx('67'),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$svg$Svg_Attributes$cy('60'),
+							_1: {ctor: '[]'}
+						}
+					};
+				case 2:
+					return {
+						ctor: '::',
+						_0: _elm_lang$svg$Svg_Attributes$cx('60'),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$svg$Svg_Attributes$cy('67'),
+							_1: {ctor: '[]'}
+						}
+					};
+				case 3:
+					return {
+						ctor: '::',
+						_0: _elm_lang$svg$Svg_Attributes$cx('53'),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$svg$Svg_Attributes$cy('60'),
+							_1: {ctor: '[]'}
+						}
+					};
+				default:
+					return {
+						ctor: '::',
+						_0: _elm_lang$svg$Svg_Attributes$cx('60'),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$svg$Svg_Attributes$cy('53'),
+							_1: {ctor: '[]'}
+						}
+					};
+			}
+		}();
 		return A2(
-			_elm_lang$html$Html$button,
+			_elm_lang$html$Html$div,
 			{
 				ctor: '::',
-				_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$Refresh),
+				_0: _elm_lang$html$Html_Attributes$style(
+					{
+						ctor: '::',
+						_0: {ctor: '_Tuple2', _0: 'display', _1: 'flex'},
+						_1: {
+							ctor: '::',
+							_0: {ctor: '_Tuple2', _0: 'justify-content', _1: 'center'},
+							_1: {ctor: '[]'}
+						}
+					}),
 				_1: {ctor: '[]'}
 			},
 			{
 				ctor: '::',
-				_0: _elm_lang$html$Html$text('Consult'),
+				_0: A2(
+					_elm_lang$svg$Svg$svg,
+					{
+						ctor: '::',
+						_0: _elm_lang$svg$Svg_Attributes$width(
+							_elm_lang$core$Basics$toString(((window.width * 9) / 10) | 0)),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$svg$Svg_Attributes$height(
+								_elm_lang$core$Basics$toString(((window.height * 9) / 10) | 0)),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$svg$Svg_Attributes$viewBox('0 0 120 120'),
+								_1: {ctor: '[]'}
+							}
+						}
+					},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$svg$Svg$circle,
+							{
+								ctor: '::',
+								_0: _elm_lang$svg$Svg_Attributes$cx('60'),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$svg$Svg_Attributes$cy('60'),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$svg$Svg_Attributes$r('12'),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$Consult),
+											_1: {ctor: '[]'}
+										}
+									}
+								}
+							},
+							{ctor: '[]'}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$svg$Svg$circle,
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									coords,
+									{
+										ctor: '::',
+										_0: _elm_lang$svg$Svg_Attributes$r('5'),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$svg$Svg_Attributes$fill('white'),
+											_1: {ctor: '[]'}
+										}
+									}),
+								{ctor: '[]'}),
+							_1: {ctor: '[]'}
+						}
+					}),
 				_1: {ctor: '[]'}
 			});
+	});
+var _user$project$Main$view = function (model) {
+	var _p12 = model;
+	if (_p12.ctor === 'Emptiness') {
+		return A2(_user$project$Main$drawConsultButton, _p12._0.window, _p12._0.time);
 	} else {
-		return A2(_user$project$Main$drawHexagram, _p11._0.window, _p11._0.hexagram);
+		return A2(_user$project$Main$drawHexagram, _p12._0.window, _p12._0.hexagram);
 	}
 };
 var _user$project$Main$Hexagram = function (a) {
@@ -10768,68 +10940,86 @@ var _user$project$Main$Emptiness = function (a) {
 };
 var _user$project$Main$init = function () {
 	var defaultSize = {width: 0, height: 0};
-	var error = function (_p12) {
+	var error = function (_p13) {
 		return _user$project$Main$WindowSize(defaultSize);
 	};
 	return {
 		ctor: '_Tuple2',
 		_0: _user$project$Main$Emptiness(
-			{window: defaultSize, time: 0}),
+			{
+				window: defaultSize,
+				clock: _nphollon$update_clock$Clock$withPeriod(100),
+				time: 0
+			}),
 		_1: A2(_elm_lang$core$Task$perform, _user$project$Main$WindowSize, _elm_lang$window$Window$size)
 	};
 }();
 var _user$project$Main$update = F2(
 	function (action, model) {
-		var _p13 = {ctor: '_Tuple2', _0: action, _1: model};
-		_v4_5:
+		var _p14 = {ctor: '_Tuple2', _0: action, _1: model};
+		_v5_6:
 		do {
-			if (_p13.ctor === '_Tuple2') {
-				switch (_p13._0.ctor) {
-					case 'Refresh':
+			if (_p14.ctor === '_Tuple2') {
+				switch (_p14._0.ctor) {
+					case 'Consult':
 						return {
 							ctor: '_Tuple2',
 							_0: model,
 							_1: A2(_elm_lang$core$Random$generate, _user$project$Main$NewHex, _user$project$Main$generator)
 						};
 					case 'WindowSize':
-						if (_p13._1.ctor === 'Emptiness') {
+						if (_p14._1.ctor === 'Emptiness') {
 							return A2(
 								_elm_lang$core$Platform_Cmd_ops['!'],
 								_user$project$Main$Emptiness(
 									_elm_lang$core$Native_Utils.update(
-										_p13._1._0,
-										{window: _p13._0._0})),
+										_p14._1._0,
+										{window: _p14._0._0})),
 								{ctor: '[]'});
 						} else {
 							return A2(
 								_elm_lang$core$Platform_Cmd_ops['!'],
 								_user$project$Main$Hexagram(
 									_elm_lang$core$Native_Utils.update(
-										_p13._1._0,
-										{window: _p13._0._0})),
+										_p14._1._0,
+										{window: _p14._0._0})),
 								{ctor: '[]'});
 						}
 					case 'NewHex':
-						if (_p13._1.ctor === 'Emptiness') {
+						if (_p14._1.ctor === 'Emptiness') {
 							return A2(
 								_elm_lang$core$Platform_Cmd_ops['!'],
 								_user$project$Main$Hexagram(
-									{hexagram: _p13._0._0, window: _p13._1._0.window}),
+									{hexagram: _p14._0._0, window: _p14._1._0.window}),
 								{ctor: '[]'});
 						} else {
 							return A2(
 								_elm_lang$core$Platform_Cmd_ops['!'],
 								_user$project$Main$Hexagram(
 									_elm_lang$core$Native_Utils.update(
-										_p13._1._0,
-										{hexagram: _p13._0._0})),
+										_p14._1._0,
+										{hexagram: _p14._0._0})),
 								{ctor: '[]'});
 						}
 					default:
-						break _v4_5;
+						if (_p14._1.ctor === 'Emptiness') {
+							var _p16 = _p14._1._0;
+							var _p15 = A4(_nphollon$update_clock$Clock$update, _elm_lang$core$Basics$always, _p14._0._0, _p16.clock, _p16.time);
+							var clock = _p15._0;
+							var time = _p15._1;
+							return A2(
+								_elm_lang$core$Platform_Cmd_ops['!'],
+								_user$project$Main$Emptiness(
+									_elm_lang$core$Native_Utils.update(
+										_p16,
+										{clock: clock, time: time})),
+								{ctor: '[]'});
+						} else {
+							break _v5_6;
+						}
 				}
 			} else {
-				break _v4_5;
+				break _v5_6;
 			}
 		} while(false);
 		return A2(
