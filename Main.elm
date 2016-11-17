@@ -5,6 +5,7 @@ import Dict exposing (Dict)
 import Random
 import String
 import Task
+import Time exposing (Time)
 import Html exposing (..)
 import Html.Attributes exposing (style)
 import Svg.Events exposing (onClick)
@@ -22,16 +23,18 @@ type Action
     | NewHex (List Line)
 
 
-type Model
+type alias Model =
+    { clock : Clock
+    , time : Int
+    , window : Window.Size
+    , phase : Phase
+    }
+
+
+type Phase
     = Emptiness
-        { clock : Clock
-        , time : Int
-        , window : Window.Size
-        }
-    | Hexagram
-        { hexagram : List Line
-        , window : Window.Size
-        }
+    | Fade Int
+    | Hexagram (List Line)
 
 
 type alias Line =
@@ -48,20 +51,22 @@ main =
         }
 
 
+period : Time
+period =
+    Time.millisecond * 33
+
+
 init : ( Model, Cmd Action )
 init =
     let
         defaultSize =
             { width = 0, height = 0 }
-
-        error _ =
-            WindowSize defaultSize
     in
-        ( Emptiness
-            { window = defaultSize
-            , clock = Clock.withPeriod 100
-            , time = 0
-            }
+        ( { window = defaultSize
+          , clock = Clock.withPeriod period
+          , time = 0
+          , phase = Emptiness
+          }
         , Task.perform WindowSize Window.size
         )
 
@@ -76,31 +81,47 @@ subscriptions _ =
 
 update : Action -> Model -> ( Model, Cmd Action )
 update action model =
-    case ( action, model ) of
-        ( Consult, _ ) ->
-            ( model, Random.generate NewHex generator )
+    case action of
+        Consult ->
+            { model | phase = Fade model.time } ! []
 
-        ( WindowSize window, Emptiness m ) ->
-            Emptiness { m | window = window } ! []
+        WindowSize window ->
+            { model | window = window } ! []
 
-        ( WindowSize window, Hexagram m ) ->
-            Hexagram { m | window = window } ! []
+        NewHex hex ->
+            { model | phase = Hexagram hex } ! []
 
-        ( NewHex hex, Emptiness m ) ->
-            Hexagram { hexagram = hex, window = m.window } ! []
-
-        ( NewHex hex, Hexagram m ) ->
-            Hexagram { m | hexagram = hex } ! []
-
-        ( Tick dt, Emptiness m ) ->
+        Tick dt ->
             let
                 ( clock, time ) =
-                    Clock.update always dt m.clock m.time
+                    Clock.update always dt model.clock model.time
+
+                cmd =
+                    phaseTransition time model.phase
             in
-                Emptiness { m | clock = clock, time = time } ! []
+                ( { model
+                    | clock = clock
+                    , time = time
+                  }
+                , cmd
+                )
+
+
+phaseTransition : Int -> Phase -> Cmd Action
+phaseTransition currentTime phase =
+    case phase of
+        Fade startTime ->
+            let
+                elapsed =
+                    toFloat (currentTime - startTime) * period
+            in
+                if elapsed > Time.second then
+                    Random.generate NewHex generator
+                else
+                    Cmd.none
 
         _ ->
-            model ! []
+            Cmd.none
 
 
 generator : Random.Generator (List Line)
@@ -143,51 +164,37 @@ toLine i =
 
 view : Model -> Html Action
 view model =
-    case model of
-        Emptiness { window, time } ->
-            drawConsultButton window time
+    case model.phase of
+        Emptiness ->
+            stableWobbler model.window model.time
 
-        Hexagram { window, hexagram } ->
-            drawHexagram window hexagram
+        Fade startTime ->
+            fadingWobbler model.window startTime model.time
+
+        Hexagram hexagram ->
+            drawHexagram model.window hexagram
 
 
-drawConsultButton : Window.Size -> Int -> Html Action
-drawConsultButton window time =
-    let
-        coords =
-            case time % 4 of
-                1 ->
-                    [ Attr.cx "67", Attr.cy "60" ]
-
-                2 ->
-                    [ Attr.cx "60", Attr.cy "67" ]
-
-                3 ->
-                    [ Attr.cx "53", Attr.cy "60" ]
-
-                _ ->
-                    [ Attr.cx "60", Attr.cy "53" ]
-    in
-        Html.div
-            [ style [ ( "display", "flex" ), ( "justify-content", "center" ) ] ]
-            [ Svg.svg
-                [ Attr.width <| toString <| window.width * 9 // 10
-                , Attr.height <| toString <| window.height * 9 // 10
-                , Attr.viewBox "0 0 120 120"
-                ]
-                (amplitudes time
-                    ++ [ Svg.circle
-                            [ Attr.cx "60"
-                            , Attr.cy "60"
-                            , Attr.r "15"
-                            , Attr.fill "none"
-                            , Attr.pointerEvents "visible"
-                            , onClick Consult
-                            ]
-                            []
-                       ]
-                )
+stableWobbler : Window.Size -> Int -> Html Action
+stableWobbler window time =
+    Html.div
+        [ style
+            [ ( "display", "flex" )
+            , ( "justify-content", "center" )
             ]
+        ]
+        [ Svg.svg
+            [ Attr.width <| toString <| window.width * 9 // 10
+            , Attr.height <| toString <| window.height * 9 // 10
+            , Attr.viewBox "0 0 120 120"
+            ]
+            (amplitudes time ++ [ consultButton ])
+        ]
+
+
+fadingWobbler : Window.Size -> Int -> Int -> Html Action
+fadingWobbler window startTime currentTime =
+    Html.div [] []
 
 
 amplitudes : Int -> List (Svg a)
@@ -202,11 +209,18 @@ amplitudes t =
                         else
                             28 - 2 * (toFloat i)
 
+                    waveTime =
+                        period * toFloat t / Time.second
+
+                    phase =
+                        0.3 * toFloat i
+
                     radius =
                         if i % 2 == 0 then
                             baseRadius
                         else
-                            baseRadius + sin (0.1 * toFloat t + 0.3 * toFloat i)
+                            baseRadius
+                                + sin (waveTime + phase)
 
                     color =
                         if i % 2 == 0 then
@@ -221,6 +235,19 @@ amplitudes t =
                         , Attr.r (toString radius)
                         ]
                         []
+
+
+consultButton : Svg Action
+consultButton =
+    Svg.circle
+        [ Attr.cx "60"
+        , Attr.cy "60"
+        , Attr.r "15"
+        , Attr.fill "none"
+        , Attr.pointerEvents "visible"
+        , onClick Consult
+        ]
+        []
 
 
 drawHexagram : Window.Size -> List Line -> Html a
