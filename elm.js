@@ -3844,6 +3844,145 @@ var _Skinney$elm_array_exploration$Array_Hamt$slice = F3(
 		}
 	});
 
+var _elm_community$easing_functions$Ease$reverse = F2(
+	function (easing, time) {
+		return easing(1 - time);
+	});
+var _elm_community$easing_functions$Ease$flip = F2(
+	function (easing, time) {
+		return 1 - easing(1 - time);
+	});
+var _elm_community$easing_functions$Ease$retour = F2(
+	function (easing, time) {
+		return (_elm_lang$core$Native_Utils.cmp(time, 0.5) < 0) ? easing(time * 2) : A2(_elm_community$easing_functions$Ease$flip, easing, (time - 0.5) * 2);
+	});
+var _elm_community$easing_functions$Ease$inOut = F3(
+	function (e1, e2, time) {
+		return (_elm_lang$core$Native_Utils.cmp(time, 0.5) < 0) ? (e1(time * 2) / 2) : (0.5 + (e2((time - 0.5) * 2) / 2));
+	});
+var _elm_community$easing_functions$Ease$inElastic = function (time) {
+	if (_elm_lang$core$Native_Utils.eq(time, 0.0)) {
+		return 0.0;
+	} else {
+		var t = time - 1;
+		var p = 0.3;
+		var s = 7.5e-2;
+		return 0 - (Math.pow(2, 10 * t) * _elm_lang$core$Basics$sin(((t - s) * (2 * _elm_lang$core$Basics$pi)) / p));
+	}
+};
+var _elm_community$easing_functions$Ease$outElastic = _elm_community$easing_functions$Ease$flip(_elm_community$easing_functions$Ease$inElastic);
+var _elm_community$easing_functions$Ease$inOutElastic = A2(_elm_community$easing_functions$Ease$inOut, _elm_community$easing_functions$Ease$inElastic, _elm_community$easing_functions$Ease$outElastic);
+var _elm_community$easing_functions$Ease$outBounce = function (time) {
+	var t4 = time - (2.625 / 2.75);
+	var t3 = time - (2.25 / 2.75);
+	var t2 = time - (1.5 / 2.75);
+	var a = 7.5625;
+	return (_elm_lang$core$Native_Utils.cmp(time, 1 / 2.75) < 0) ? ((a * time) * time) : ((_elm_lang$core$Native_Utils.cmp(time, 2 / 2.75) < 0) ? (((a * t2) * t2) + 0.75) : ((_elm_lang$core$Native_Utils.cmp(time, 2.5 / 2.75) < 0) ? (((a * t3) * t3) + 0.9375) : (((a * t4) * t4) + 0.984375)));
+};
+var _elm_community$easing_functions$Ease$inBounce = _elm_community$easing_functions$Ease$flip(_elm_community$easing_functions$Ease$outBounce);
+var _elm_community$easing_functions$Ease$inOutBounce = A2(_elm_community$easing_functions$Ease$inOut, _elm_community$easing_functions$Ease$inBounce, _elm_community$easing_functions$Ease$outBounce);
+var _elm_community$easing_functions$Ease$inBack = function (time) {
+	return (time * time) * ((2.70158 * time) - 1.70158);
+};
+var _elm_community$easing_functions$Ease$outBack = _elm_community$easing_functions$Ease$flip(_elm_community$easing_functions$Ease$inBack);
+var _elm_community$easing_functions$Ease$inOutBack = A2(_elm_community$easing_functions$Ease$inOut, _elm_community$easing_functions$Ease$inBack, _elm_community$easing_functions$Ease$outBack);
+var _elm_community$easing_functions$Ease$outCirc = function (time) {
+	return _elm_lang$core$Basics$sqrt(
+		1 - Math.pow(time - 1, 2));
+};
+var _elm_community$easing_functions$Ease$inCirc = _elm_community$easing_functions$Ease$flip(_elm_community$easing_functions$Ease$outCirc);
+var _elm_community$easing_functions$Ease$inOutCirc = A2(_elm_community$easing_functions$Ease$inOut, _elm_community$easing_functions$Ease$inCirc, _elm_community$easing_functions$Ease$outCirc);
+var _elm_community$easing_functions$Ease$inExpo = function (time) {
+	return _elm_lang$core$Native_Utils.eq(time, 0.0) ? 0.0 : Math.pow(2, 10 * (time - 1));
+};
+var _elm_community$easing_functions$Ease$outExpo = _elm_community$easing_functions$Ease$flip(_elm_community$easing_functions$Ease$inExpo);
+var _elm_community$easing_functions$Ease$inOutExpo = A2(_elm_community$easing_functions$Ease$inOut, _elm_community$easing_functions$Ease$inExpo, _elm_community$easing_functions$Ease$outExpo);
+var _elm_community$easing_functions$Ease$outSine = function (time) {
+	return _elm_lang$core$Basics$sin(time * (_elm_lang$core$Basics$pi / 2));
+};
+var _elm_community$easing_functions$Ease$inSine = _elm_community$easing_functions$Ease$flip(_elm_community$easing_functions$Ease$outSine);
+var _elm_community$easing_functions$Ease$inOutSine = A2(_elm_community$easing_functions$Ease$inOut, _elm_community$easing_functions$Ease$inSine, _elm_community$easing_functions$Ease$outSine);
+var _elm_community$easing_functions$Ease$inQuint = function (time) {
+	return Math.pow(time, 5);
+};
+var _elm_community$easing_functions$Ease$outQuint = _elm_community$easing_functions$Ease$flip(_elm_community$easing_functions$Ease$inQuint);
+var _elm_community$easing_functions$Ease$inOutQuint = A2(_elm_community$easing_functions$Ease$inOut, _elm_community$easing_functions$Ease$inQuint, _elm_community$easing_functions$Ease$outQuint);
+var _elm_community$easing_functions$Ease$inQuart = function (time) {
+	return Math.pow(time, 4);
+};
+var _elm_community$easing_functions$Ease$outQuart = _elm_community$easing_functions$Ease$flip(_elm_community$easing_functions$Ease$inQuart);
+var _elm_community$easing_functions$Ease$inOutQuart = A2(_elm_community$easing_functions$Ease$inOut, _elm_community$easing_functions$Ease$inQuart, _elm_community$easing_functions$Ease$outQuart);
+var _elm_community$easing_functions$Ease$inCubic = function (time) {
+	return Math.pow(time, 3);
+};
+var _elm_community$easing_functions$Ease$outCubic = _elm_community$easing_functions$Ease$flip(_elm_community$easing_functions$Ease$inCubic);
+var _elm_community$easing_functions$Ease$inOutCubic = A2(_elm_community$easing_functions$Ease$inOut, _elm_community$easing_functions$Ease$inCubic, _elm_community$easing_functions$Ease$outCubic);
+var _elm_community$easing_functions$Ease$inQuad = function (time) {
+	return Math.pow(time, 2);
+};
+var _elm_community$easing_functions$Ease$outQuad = _elm_community$easing_functions$Ease$flip(_elm_community$easing_functions$Ease$inQuad);
+var _elm_community$easing_functions$Ease$inOutQuad = A2(_elm_community$easing_functions$Ease$inOut, _elm_community$easing_functions$Ease$inQuad, _elm_community$easing_functions$Ease$outQuad);
+var _elm_community$easing_functions$Ease$bezier = F5(
+	function (x1, y1, x2, y2, time) {
+		var pair = F4(
+			function (interpolate, _p1, _p0, v) {
+				var _p2 = _p1;
+				var _p3 = _p0;
+				return {
+					ctor: '_Tuple2',
+					_0: A3(interpolate, _p2._0, _p3._0, v),
+					_1: A3(interpolate, _p2._1, _p3._1, v)
+				};
+			});
+		var lerp = F3(
+			function (from, to, v) {
+				return from + ((to - from) * v);
+			});
+		var casteljau = function (ps) {
+			casteljau:
+			while (true) {
+				var _p4 = ps;
+				if (((_p4.ctor === '::') && (_p4._0.ctor === '_Tuple2')) && (_p4._1.ctor === '[]')) {
+					return _p4._0._1;
+				} else {
+					var _p5 = _p4;
+					var _v3 = A3(
+						_elm_lang$core$List$map2,
+						F2(
+							function (x, y) {
+								return A4(pair, lerp, x, y, time);
+							}),
+						_p5,
+						A2(
+							_elm_lang$core$Maybe$withDefault,
+							{ctor: '[]'},
+							_elm_lang$core$List$tail(_p5)));
+					ps = _v3;
+					continue casteljau;
+				}
+			}
+		};
+		return casteljau(
+			{
+				ctor: '::',
+				_0: {ctor: '_Tuple2', _0: 0, _1: 0},
+				_1: {
+					ctor: '::',
+					_0: {ctor: '_Tuple2', _0: x1, _1: y1},
+					_1: {
+						ctor: '::',
+						_0: {ctor: '_Tuple2', _0: x2, _1: y2},
+						_1: {
+							ctor: '::',
+							_0: {ctor: '_Tuple2', _0: 1, _1: 1},
+							_1: {ctor: '[]'}
+						}
+					}
+				}
+			});
+	});
+var _elm_community$easing_functions$Ease$linear = _elm_lang$core$Basics$identity;
+
 var _elm_lang$animation_frame$Native_AnimationFrame = function()
 {
 
@@ -11151,8 +11290,12 @@ var _user$project$Main$drawText = function (halfLines) {
 		{ctor: '[]'},
 		{ctor: '::', _0: numberLine, _1: title});
 };
-var _user$project$Main$drawHalfLine = F2(
-	function (index, isYang) {
+var _user$project$Main$drawHalfLine = F3(
+	function (percent, index, isYang) {
+		var yOffset = (15 * _elm_lang$core$Basics$toFloat(index)) + 5;
+		var height = percent * 9;
+		var fullHeight = 9;
+		var y = yOffset + ((0.5 * fullHeight) * (1 - percent));
 		var rect = F2(
 			function (x, width) {
 				return A2(
@@ -11160,10 +11303,11 @@ var _user$project$Main$drawHalfLine = F2(
 					{
 						ctor: '::',
 						_0: _elm_lang$svg$Svg_Attributes$y(
-							_elm_lang$core$Basics$toString((15 * index) + 5)),
+							_elm_lang$core$Basics$toString(y)),
 						_1: {
 							ctor: '::',
-							_0: _elm_lang$svg$Svg_Attributes$height('9'),
+							_0: _elm_lang$svg$Svg_Attributes$height(
+								_elm_lang$core$Basics$toString(height)),
 							_1: {
 								ctor: '::',
 								_0: _elm_lang$svg$Svg_Attributes$x(
@@ -11192,16 +11336,20 @@ var _user$project$Main$drawHalfLine = F2(
 				}
 			});
 	});
-var _user$project$Main$drawHalfHexagram = function (halfLines) {
-	return A2(
-		_elm_lang$svg$Svg$g,
-		{
-			ctor: '::',
-			_0: _elm_lang$svg$Svg_Attributes$fill('white'),
-			_1: {ctor: '[]'}
-		},
-		A2(_elm_lang$core$List$indexedMap, _user$project$Main$drawHalfLine, halfLines));
-};
+var _user$project$Main$drawHalfHexagram = F2(
+	function (percent, halfLines) {
+		return A2(
+			_elm_lang$svg$Svg$g,
+			{
+				ctor: '::',
+				_0: _elm_lang$svg$Svg_Attributes$fill('white'),
+				_1: {ctor: '[]'}
+			},
+			A2(
+				_elm_lang$core$List$indexedMap,
+				_user$project$Main$drawHalfLine(percent),
+				halfLines));
+	});
 var _user$project$Main$splitLine = F2(
 	function (_p2, _p1) {
 		var _p3 = _p2;
@@ -11294,7 +11442,7 @@ var _user$project$Main$drawHexagram = F2(
 			positionAttrs,
 			{
 				ctor: '::',
-				_0: _user$project$Main$drawHalfHexagram(before),
+				_0: A2(_user$project$Main$drawHalfHexagram, 1, before),
 				_1: {
 					ctor: '::',
 					_0: _user$project$Main$drawText(before),
@@ -11306,7 +11454,7 @@ var _user$project$Main$drawHexagram = F2(
 			positionAttrs,
 			{
 				ctor: '::',
-				_0: _user$project$Main$drawHalfHexagram(after),
+				_0: A2(_user$project$Main$drawHalfHexagram, 1, after),
 				_1: {
 					ctor: '::',
 					_0: _user$project$Main$drawText(after),
@@ -11329,6 +11477,24 @@ var _user$project$Main$drawHexagram = F2(
 					_1: {ctor: '[]'}
 				}
 			});
+	});
+var _user$project$Main$drawFadeIn = F2(
+	function (progress, lines) {
+		var percent = A2(
+			_elm_lang$core$Basics$min,
+			1,
+			_elm_community$easing_functions$Ease$inOutQuad(progress));
+		return A3(
+			_elm_lang$core$Basics$flip,
+			F2(
+				function (x, y) {
+					return {ctor: '::', _0: x, _1: y};
+				}),
+			{ctor: '[]'},
+			A2(
+				_user$project$Main$drawHalfHexagram,
+				percent,
+				A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, lines)));
 	});
 var _user$project$Main$wobbler = function (amplitudes) {
 	var color = function (i) {
@@ -11392,6 +11558,11 @@ var _user$project$Main$oscAmp = function (t) {
 					0) ? (baseRadius + 0.5) : (baseRadius + _elm_lang$core$Basics$sin(angle));
 			}));
 };
+var _user$project$Main$fadingWobbler = F2(
+	function (startTime, elapsed) {
+		return _user$project$Main$wobbler(
+			A2(_user$project$Main$fadeAmp, startTime, elapsed));
+	});
 var _user$project$Main$frame = F2(
 	function (window, contents) {
 		return A2(
@@ -11433,14 +11604,6 @@ var _user$project$Main$frame = F2(
 				_1: {ctor: '[]'}
 			});
 	});
-var _user$project$Main$fadingWobbler = F3(
-	function (window, startTime, elapsed) {
-		return A2(
-			_user$project$Main$frame,
-			window,
-			_user$project$Main$wobbler(
-				A2(_user$project$Main$fadeAmp, startTime, elapsed)));
-	});
 var _user$project$Main$toLine = function (i) {
 	var _p8 = i;
 	switch (_p8) {
@@ -11464,19 +11627,12 @@ var _user$project$Main$toLine = function (i) {
 			return _elm_lang$core$Native_Utils.crashCase(
 				'Main',
 				{
-					start: {line: 132, column: 5},
-					end: {line: 158, column: 39}
+					start: {line: 143, column: 5},
+					end: {line: 169, column: 39}
 				},
 				_p8)('Out of range');
 	}
 };
-var _user$project$Main$generator = A2(
-	_elm_lang$core$Random$list,
-	6,
-	A2(
-		_elm_lang$core$Random$map,
-		_user$project$Main$toLine,
-		A2(_elm_lang$core$Random$int, 1, 8)));
 var _user$project$Main$Model = F3(
 	function (a, b, c) {
 		return {clock: a, window: b, phase: c};
@@ -11505,63 +11661,68 @@ var _user$project$Main$subscriptions = function (_p10) {
 var _user$project$Main$Consult = function (a) {
 	return {ctor: 'Consult', _0: a};
 };
-var _user$project$Main$stableWobbler = F2(
-	function (window, time) {
-		var consultButton = A2(
-			_elm_lang$svg$Svg$circle,
-			{
+var _user$project$Main$stableWobbler = function (time) {
+	var consultButton = A2(
+		_elm_lang$svg$Svg$circle,
+		{
+			ctor: '::',
+			_0: _elm_lang$svg$Svg_Attributes$cx('60'),
+			_1: {
 				ctor: '::',
-				_0: _elm_lang$svg$Svg_Attributes$cx('60'),
+				_0: _elm_lang$svg$Svg_Attributes$cy('60'),
 				_1: {
 					ctor: '::',
-					_0: _elm_lang$svg$Svg_Attributes$cy('60'),
+					_0: _elm_lang$svg$Svg_Attributes$r('30'),
 					_1: {
 						ctor: '::',
-						_0: _elm_lang$svg$Svg_Attributes$r('30'),
+						_0: _elm_lang$svg$Svg_Attributes$fill('none'),
 						_1: {
 							ctor: '::',
-							_0: _elm_lang$svg$Svg_Attributes$fill('none'),
+							_0: _elm_lang$svg$Svg_Attributes$pointerEvents('visible'),
 							_1: {
 								ctor: '::',
-								_0: _elm_lang$svg$Svg_Attributes$pointerEvents('visible'),
-								_1: {
-									ctor: '::',
-									_0: _elm_lang$svg$Svg_Events$onClick(
-										_user$project$Main$Consult(time)),
-									_1: {ctor: '[]'}
-								}
+								_0: _elm_lang$svg$Svg_Events$onClick(
+									_user$project$Main$Consult(time)),
+								_1: {ctor: '[]'}
 							}
 						}
 					}
 				}
-			},
-			{ctor: '[]'});
-		return A2(
-			_user$project$Main$frame,
-			window,
-			A2(
-				_elm_lang$core$Basics_ops['++'],
-				_user$project$Main$wobbler(
-					_user$project$Main$oscAmp(time)),
-				{
-					ctor: '::',
-					_0: consultButton,
-					_1: {ctor: '[]'}
-				}));
-	});
+			}
+		},
+		{ctor: '[]'});
+	return A2(
+		_elm_lang$core$Basics_ops['++'],
+		_user$project$Main$wobbler(
+			_user$project$Main$oscAmp(time)),
+		{
+			ctor: '::',
+			_0: consultButton,
+			_1: {ctor: '[]'}
+		});
+};
 var _user$project$Main$view = function (model) {
 	var _p11 = model.phase;
 	switch (_p11.ctor) {
 		case 'JustAButton':
-			return A2(_user$project$Main$stableWobbler, model.window, _p11._0);
+			return A2(
+				_user$project$Main$frame,
+				model.window,
+				_user$project$Main$stableWobbler(_p11._0));
 		case 'ButtonFadeOut':
-			return A3(_user$project$Main$fadingWobbler, model.window, _p11._0.startTime, _p11._0.elapsed);
+			return A2(
+				_user$project$Main$frame,
+				model.window,
+				A2(_user$project$Main$fadingWobbler, _p11._0.startTime, _p11._0.elapsed));
 		case 'NeedHexagram':
 			return _elm_lang$html$Html$text('');
 		case 'WaitingForHexagram':
 			return _elm_lang$html$Html$text('');
 		case 'HexagramFadeIn':
-			return _elm_lang$html$Html$text('');
+			return A2(
+				_user$project$Main$frame,
+				model.window,
+				A2(_user$project$Main$drawFadeIn, _p11._0.progress, _p11._0.hex));
 		default:
 			return A2(_user$project$Main$drawHexagram, model.window, _p11._0);
 	}
@@ -11573,6 +11734,25 @@ var _user$project$Main$HexagramFadeIn = function (a) {
 	return {ctor: 'HexagramFadeIn', _0: a};
 };
 var _user$project$Main$WaitingForHexagram = {ctor: 'WaitingForHexagram'};
+var _user$project$Main$requestHexagram = function (model) {
+	var cmd = A2(
+		_elm_lang$core$Random$generate,
+		_user$project$Main$NewHex,
+		A2(
+			_elm_lang$core$Random$list,
+			6,
+			A2(
+				_elm_lang$core$Random$map,
+				_user$project$Main$toLine,
+				A2(_elm_lang$core$Random$int, 1, 8))));
+	return {
+		ctor: '_Tuple2',
+		_0: _elm_lang$core$Native_Utils.update(
+			model,
+			{phase: _user$project$Main$WaitingForHexagram}),
+		_1: cmd
+	};
+};
 var _user$project$Main$NeedHexagram = {ctor: 'NeedHexagram'};
 var _user$project$Main$ButtonFadeOut = function (a) {
 	return {ctor: 'ButtonFadeOut', _0: a};
@@ -11613,7 +11793,7 @@ var _user$project$Main$animationUpdate = F2(
 				return (_elm_lang$core$Native_Utils.cmp(_p14.progress, 1) > 0) ? _user$project$Main$Hexagram(_p14.hex) : _user$project$Main$HexagramFadeIn(
 					_elm_lang$core$Native_Utils.update(
 						_p14,
-						{progress: _p14.progress + 1.0e-2}));
+						{progress: _p14.progress + 3.0e-2}));
 			default:
 				return phase;
 		}
@@ -11622,13 +11802,7 @@ var _user$project$Main$timeUpdate = F2(
 	function (dt, model) {
 		var _p15 = model.phase;
 		if (_p15.ctor === 'NeedHexagram') {
-			return {
-				ctor: '_Tuple2',
-				_0: _elm_lang$core$Native_Utils.update(
-					model,
-					{phase: _user$project$Main$WaitingForHexagram}),
-				_1: A2(_elm_lang$core$Random$generate, _user$project$Main$NewHex, _user$project$Main$generator)
-			};
+			return _user$project$Main$requestHexagram(model);
 		} else {
 			var _p16 = A4(_nphollon$update_clock$Clock$update, _user$project$Main$animationUpdate, dt, model.clock, model.phase);
 			var clock = _p16._0;
@@ -11668,7 +11842,8 @@ var _user$project$Main$update = F2(
 					_elm_lang$core$Native_Utils.update(
 						model,
 						{
-							phase: _user$project$Main$Hexagram(_p17._0)
+							phase: _user$project$Main$HexagramFadeIn(
+								{progress: 0, hex: _p17._0})
 						}),
 					{ctor: '[]'});
 			default:

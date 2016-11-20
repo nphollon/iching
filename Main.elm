@@ -14,6 +14,7 @@ import Svg.Attributes as Attr
 import Window
 import AnimationFrame
 import Clock exposing (Clock)
+import Ease
 
 
 type Action
@@ -98,7 +99,14 @@ update action model =
             { model | window = window } ! []
 
         NewHex hex ->
-            { model | phase = Hexagram hex } ! []
+            { model
+                | phase =
+                    HexagramFadeIn
+                        { progress = 0
+                        , hex = hex
+                        }
+            }
+                ! []
 
         Tick dt ->
             timeUpdate dt model
@@ -108,9 +116,7 @@ timeUpdate : Time -> Model -> ( Model, Cmd Action )
 timeUpdate dt model =
     case model.phase of
         NeedHexagram ->
-            ( { model | phase = WaitingForHexagram }
-            , Random.generate NewHex generator
-            )
+            requestHexagram model
 
         _ ->
             let
@@ -120,11 +126,16 @@ timeUpdate dt model =
                 { model | clock = clock, phase = phase } ! []
 
 
-generator : Random.Generator (List Line)
-generator =
-    Random.int 1 8
-        |> Random.map toLine
-        |> Random.list 6
+requestHexagram : Model -> ( Model, Cmd Action )
+requestHexagram model =
+    let
+        cmd =
+            Random.int 1 8
+                |> Random.map toLine
+                |> Random.list 6
+                |> Random.generate NewHex
+    in
+        ( { model | phase = WaitingForHexagram }, cmd )
 
 
 toLine : Int -> Line
@@ -180,7 +191,7 @@ animationUpdate dt phase =
             if m.progress > 1 then
                 Hexagram m.hex
             else
-                HexagramFadeIn { m | progress = m.progress + 0.01 }
+                HexagramFadeIn { m | progress = m.progress + 0.03 }
 
         Hexagram _ ->
             phase
@@ -190,10 +201,10 @@ view : Model -> Html Action
 view model =
     case model.phase of
         JustAButton time ->
-            stableWobbler model.window time
+            frame model.window (stableWobbler time)
 
         ButtonFadeOut { startTime, elapsed } ->
-            fadingWobbler model.window startTime elapsed
+            frame model.window (fadingWobbler startTime elapsed)
 
         NeedHexagram ->
             Html.text ""
@@ -202,7 +213,7 @@ view model =
             Html.text ""
 
         HexagramFadeIn { progress, hex } ->
-            Html.text ""
+            frame model.window (drawFadeIn progress hex)
 
         Hexagram hexagram ->
             drawHexagram model.window hexagram
@@ -225,8 +236,8 @@ frame window contents =
         ]
 
 
-stableWobbler : Window.Size -> Time -> Html Action
-stableWobbler window time =
+stableWobbler : Time -> List (Svg Action)
+stableWobbler time =
     let
         consultButton =
             Svg.circle
@@ -241,14 +252,11 @@ stableWobbler window time =
     in
         wobbler (oscAmp time)
             ++ [ consultButton ]
-            |> frame window
 
 
-fadingWobbler : Window.Size -> Time -> Time -> Html Action
-fadingWobbler window startTime elapsed =
-    fadeAmp startTime elapsed
-        |> wobbler
-        |> frame window
+fadingWobbler : Time -> Time -> List (Svg a)
+fadingWobbler startTime elapsed =
+    wobbler (fadeAmp startTime elapsed)
 
 
 oscAmp : Time -> List Float
@@ -314,6 +322,17 @@ wobbler amplitudes =
         List.indexedMap drawCircle amplitudes
 
 
+drawFadeIn : Float -> List Line -> List (Svg a)
+drawFadeIn progress lines =
+    let
+        percent =
+            min 1 (Ease.inOutQuad progress)
+    in
+        List.map Tuple.first lines
+            |> drawHalfHexagram percent
+            |> flip (::) []
+
+
 drawHexagram : Window.Size -> List Line -> Html a
 drawHexagram window lines =
     let
@@ -337,13 +356,13 @@ drawHexagram window lines =
 
         beforeGraphic =
             Svg.svg positionAttrs
-                [ drawHalfHexagram before
+                [ drawHalfHexagram 1 before
                 , drawText before
                 ]
 
         afterGraphic =
             Svg.svg positionAttrs
-                [ drawHalfHexagram after
+                [ drawHalfHexagram 1 after
                 , drawText after
                 ]
 
@@ -377,19 +396,31 @@ splitLine ( before, after ) ( befores, changes, afters ) =
     )
 
 
-drawHalfHexagram : List Bool -> Svg a
-drawHalfHexagram halfLines =
-    List.indexedMap drawHalfLine halfLines
+drawHalfHexagram : Float -> List Bool -> Svg a
+drawHalfHexagram percent halfLines =
+    List.indexedMap (drawHalfLine percent) halfLines
         |> Svg.g [ Attr.fill "white" ]
 
 
-drawHalfLine : Int -> Bool -> Svg a
-drawHalfLine index isYang =
+drawHalfLine : Float -> Int -> Bool -> Svg a
+drawHalfLine percent index isYang =
     let
+        fullHeight =
+            9
+
+        height =
+            percent * 9
+
+        yOffset =
+            15 * toFloat index + 5
+
+        y =
+            yOffset + 0.5 * fullHeight * (1 - percent)
+
         rect x width =
             Svg.rect
-                [ Attr.y <| toString <| 15 * index + 5
-                , Attr.height "9"
+                [ Attr.y <| toString y
+                , Attr.height <| toString height
                 , Attr.x <| toString x
                 , Attr.width <| toString width
                 ]
