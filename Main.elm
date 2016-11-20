@@ -19,13 +19,13 @@ import Clock exposing (Clock)
 type Action
     = Consult
     | WindowSize Window.Size
-    | Tick Float
+    | Tick Time
     | NewHex (List Line)
 
 
 type alias Model =
     { clock : Clock
-    , time : Int
+    , time : Time
     , window : Window.Size
     , phase : Phase
     }
@@ -33,7 +33,7 @@ type alias Model =
 
 type Phase
     = Emptiness
-    | Fade Int
+    | Fade Time
     | Hexagram (List Line)
 
 
@@ -51,11 +51,6 @@ main =
         }
 
 
-period : Time
-period =
-    Time.millisecond * 33
-
-
 init : ( Model, Cmd Action )
 init =
     let
@@ -63,7 +58,7 @@ init =
             { width = 0, height = 0 }
     in
         ( { window = defaultSize
-          , clock = Clock.withPeriod period
+          , clock = Clock.withPeriod (33 * Time.millisecond)
           , time = 0
           , phase = Emptiness
           }
@@ -94,7 +89,7 @@ update action model =
         Tick dt ->
             let
                 ( clock, time ) =
-                    Clock.update always dt model.clock model.time
+                    Clock.update (+) dt model.clock model.time
 
                 cmd =
                     phaseTransition time model.phase
@@ -107,18 +102,14 @@ update action model =
                 )
 
 
-phaseTransition : Int -> Phase -> Cmd Action
+phaseTransition : Time -> Phase -> Cmd Action
 phaseTransition currentTime phase =
     case phase of
         Fade startTime ->
-            let
-                elapsed =
-                    toFloat (currentTime - startTime) * period
-            in
-                if elapsed > Time.second then
-                    Random.generate NewHex generator
-                else
-                    Cmd.none
+            if (currentTime - startTime) > (2 * Time.second) then
+                Random.generate NewHex generator
+            else
+                Cmd.none
 
         _ ->
             Cmd.none
@@ -175,8 +166,8 @@ view model =
             drawHexagram model.window hexagram
 
 
-stableWobbler : Window.Size -> Int -> Html Action
-stableWobbler window time =
+frame : Window.Size -> List (Svg a) -> Html a
+frame window contents =
     Html.div
         [ style
             [ ( "display", "flex" )
@@ -188,53 +179,85 @@ stableWobbler window time =
             , Attr.height <| toString <| window.height * 9 // 10
             , Attr.viewBox "0 0 120 120"
             ]
-            (amplitudes time ++ [ consultButton ])
+            contents
         ]
 
 
-fadingWobbler : Window.Size -> Int -> Int -> Html Action
+stableWobbler : Window.Size -> Time -> Html Action
+stableWobbler window time =
+    wobbler (oscAmp time)
+        ++ [ consultButton ]
+        |> frame window
+
+
+fadingWobbler : Window.Size -> Time -> Time -> Html Action
 fadingWobbler window startTime currentTime =
-    Html.div [] []
+    fadeAmp startTime currentTime
+        |> wobbler
+        |> frame window
 
 
-amplitudes : Int -> List (Svg a)
-amplitudes t =
+oscAmp : Time -> List Float
+oscAmp t =
     Array.toList <|
         Array.initialize 13 <|
             \i ->
                 let
+                    angle =
+                        t / 500 + 0.3 * toFloat i
+
                     baseRadius =
-                        if i % 2 == 0 then
-                            28.5 - 2 * toFloat i
-                        else
-                            28 - 2 * (toFloat i)
-
-                    waveTime =
-                        period * toFloat t / Time.second
-
-                    phase =
-                        0.3 * toFloat i
-
-                    radius =
-                        if i % 2 == 0 then
-                            baseRadius
-                        else
-                            baseRadius
-                                + sin (waveTime + phase)
-
-                    color =
-                        if i % 2 == 0 then
-                            "black"
-                        else
-                            "white"
+                        28 - 2 * toFloat i
                 in
-                    Svg.circle
-                        [ Attr.cx "60"
-                        , Attr.cy "60"
-                        , Attr.fill color
-                        , Attr.r (toString radius)
-                        ]
-                        []
+                    if i % 2 == 0 then
+                        baseRadius + 0.5
+                    else
+                        baseRadius + sin angle
+
+
+fadeAmp : Time -> Time -> List Float
+fadeAmp startTime currentTime =
+    Array.toList <|
+        Array.initialize 13 <|
+            \i ->
+                let
+                    angle =
+                        currentTime / 500 + 0.3 * toFloat i
+
+                    baseRadius =
+                        28 - 2 * toFloat i
+
+                    blackSweep =
+                        0.02 * (currentTime - startTime)
+
+                    whiteSweep =
+                        0.018 * (currentTime - startTime)
+                in
+                    if i % 2 == 0 then
+                        baseRadius + 0.5 + blackSweep
+                    else
+                        baseRadius + sin angle + whiteSweep
+
+
+wobbler : List Float -> List (Svg a)
+wobbler amplitudes =
+    let
+        color i =
+            if i % 2 == 0 then
+                "black"
+            else
+                "white"
+
+        drawCircle i radius =
+            Svg.circle
+                [ Attr.cx "60"
+                , Attr.cy "60"
+                , Attr.fill (color i)
+                , Attr.r (toString radius)
+                ]
+                []
+    in
+        List.indexedMap drawCircle amplitudes
 
 
 consultButton : Svg Action
@@ -242,7 +265,7 @@ consultButton =
     Svg.circle
         [ Attr.cx "60"
         , Attr.cy "60"
-        , Attr.r "15"
+        , Attr.r "30"
         , Attr.fill "none"
         , Attr.pointerEvents "visible"
         , onClick Consult
