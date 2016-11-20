@@ -11364,16 +11364,16 @@ var _user$project$Main$wobbler = function (amplitudes) {
 	return A2(_elm_lang$core$List$indexedMap, drawCircle, amplitudes);
 };
 var _user$project$Main$fadeAmp = F2(
-	function (startTime, currentTime) {
+	function (startTime, elapsed) {
 		return _Skinney$elm_array_exploration$Array_Hamt$toList(
 			A2(
 				_Skinney$elm_array_exploration$Array_Hamt$initialize,
 				13,
 				function (i) {
-					var whiteSweep = 1.8e-2 * (currentTime - startTime);
-					var blackSweep = 2.0e-2 * (currentTime - startTime);
+					var whiteSweep = 1.8e-2 * elapsed;
+					var blackSweep = 2.0e-2 * elapsed;
 					var baseRadius = 28 - (2 * _elm_lang$core$Basics$toFloat(i));
-					var angle = (currentTime / 500) + (0.3 * _elm_lang$core$Basics$toFloat(i));
+					var angle = ((startTime + elapsed) / 500) + (0.3 * _elm_lang$core$Basics$toFloat(i));
 					return _elm_lang$core$Native_Utils.eq(
 						A2(_elm_lang$core$Basics_ops['%'], i, 2),
 						0) ? ((baseRadius + 0.5) + blackSweep) : ((baseRadius + _elm_lang$core$Basics$sin(angle)) + whiteSweep);
@@ -11434,12 +11434,12 @@ var _user$project$Main$frame = F2(
 			});
 	});
 var _user$project$Main$fadingWobbler = F3(
-	function (window, startTime, currentTime) {
+	function (window, startTime, elapsed) {
 		return A2(
 			_user$project$Main$frame,
 			window,
 			_user$project$Main$wobbler(
-				A2(_user$project$Main$fadeAmp, startTime, currentTime)));
+				A2(_user$project$Main$fadeAmp, startTime, elapsed)));
 	});
 var _user$project$Main$toLine = function (i) {
 	var _p8 = i;
@@ -11464,8 +11464,8 @@ var _user$project$Main$toLine = function (i) {
 			return _elm_lang$core$Native_Utils.crashCase(
 				'Main',
 				{
-					start: {line: 127, column: 5},
-					end: {line: 153, column: 39}
+					start: {line: 132, column: 5},
+					end: {line: 158, column: 39}
 				},
 				_p8)('Out of range');
 	}
@@ -11477,29 +11477,20 @@ var _user$project$Main$generator = A2(
 		_elm_lang$core$Random$map,
 		_user$project$Main$toLine,
 		A2(_elm_lang$core$Random$int, 1, 8)));
-var _user$project$Main$Model = F4(
-	function (a, b, c, d) {
-		return {clock: a, time: b, window: c, phase: d};
+var _user$project$Main$Model = F3(
+	function (a, b, c) {
+		return {clock: a, window: b, phase: c};
 	});
 var _user$project$Main$NewHex = function (a) {
 	return {ctor: 'NewHex', _0: a};
 };
-var _user$project$Main$phaseTransition = F2(
-	function (currentTime, phase) {
-		var _p10 = phase;
-		if (_p10.ctor === 'Fade') {
-			return (_elm_lang$core$Native_Utils.cmp(currentTime - _p10._0, 2 * _elm_lang$core$Time$second) > 0) ? A2(_elm_lang$core$Random$generate, _user$project$Main$NewHex, _user$project$Main$generator) : _elm_lang$core$Platform_Cmd$none;
-		} else {
-			return _elm_lang$core$Platform_Cmd$none;
-		}
-	});
 var _user$project$Main$Tick = function (a) {
 	return {ctor: 'Tick', _0: a};
 };
 var _user$project$Main$WindowSize = function (a) {
 	return {ctor: 'WindowSize', _0: a};
 };
-var _user$project$Main$subscriptions = function (_p11) {
+var _user$project$Main$subscriptions = function (_p10) {
 	return _elm_lang$core$Platform_Sub$batch(
 		{
 			ctor: '::',
@@ -11511,37 +11502,40 @@ var _user$project$Main$subscriptions = function (_p11) {
 			}
 		});
 };
-var _user$project$Main$Consult = {ctor: 'Consult'};
-var _user$project$Main$consultButton = A2(
-	_elm_lang$svg$Svg$circle,
-	{
-		ctor: '::',
-		_0: _elm_lang$svg$Svg_Attributes$cx('60'),
-		_1: {
-			ctor: '::',
-			_0: _elm_lang$svg$Svg_Attributes$cy('60'),
-			_1: {
+var _user$project$Main$Consult = function (a) {
+	return {ctor: 'Consult', _0: a};
+};
+var _user$project$Main$stableWobbler = F2(
+	function (window, time) {
+		var consultButton = A2(
+			_elm_lang$svg$Svg$circle,
+			{
 				ctor: '::',
-				_0: _elm_lang$svg$Svg_Attributes$r('30'),
+				_0: _elm_lang$svg$Svg_Attributes$cx('60'),
 				_1: {
 					ctor: '::',
-					_0: _elm_lang$svg$Svg_Attributes$fill('none'),
+					_0: _elm_lang$svg$Svg_Attributes$cy('60'),
 					_1: {
 						ctor: '::',
-						_0: _elm_lang$svg$Svg_Attributes$pointerEvents('visible'),
+						_0: _elm_lang$svg$Svg_Attributes$r('30'),
 						_1: {
 							ctor: '::',
-							_0: _elm_lang$svg$Svg_Events$onClick(_user$project$Main$Consult),
-							_1: {ctor: '[]'}
+							_0: _elm_lang$svg$Svg_Attributes$fill('none'),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$svg$Svg_Attributes$pointerEvents('visible'),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$svg$Svg_Events$onClick(
+										_user$project$Main$Consult(time)),
+									_1: {ctor: '[]'}
+								}
+							}
 						}
 					}
 				}
-			}
-		}
-	},
-	{ctor: '[]'});
-var _user$project$Main$stableWobbler = F2(
-	function (window, time) {
+			},
+			{ctor: '[]'});
 		return A2(
 			_user$project$Main$frame,
 			window,
@@ -11551,79 +11545,41 @@ var _user$project$Main$stableWobbler = F2(
 					_user$project$Main$oscAmp(time)),
 				{
 					ctor: '::',
-					_0: _user$project$Main$consultButton,
+					_0: consultButton,
 					_1: {ctor: '[]'}
 				}));
 	});
 var _user$project$Main$view = function (model) {
-	var _p12 = model.phase;
-	switch (_p12.ctor) {
-		case 'Emptiness':
-			return A2(_user$project$Main$stableWobbler, model.window, model.time);
-		case 'Fade':
-			return A3(_user$project$Main$fadingWobbler, model.window, _p12._0, model.time);
+	var _p11 = model.phase;
+	switch (_p11.ctor) {
+		case 'JustAButton':
+			return A2(_user$project$Main$stableWobbler, model.window, _p11._0);
+		case 'ButtonFadeOut':
+			return A3(_user$project$Main$fadingWobbler, model.window, _p11._0.startTime, _p11._0.elapsed);
+		case 'NeedHexagram':
+			return _elm_lang$html$Html$text('');
+		case 'WaitingForHexagram':
+			return _elm_lang$html$Html$text('');
+		case 'HexagramFadeIn':
+			return _elm_lang$html$Html$text('');
 		default:
-			return A2(_user$project$Main$drawHexagram, model.window, _p12._0);
+			return A2(_user$project$Main$drawHexagram, model.window, _p11._0);
 	}
 };
 var _user$project$Main$Hexagram = function (a) {
 	return {ctor: 'Hexagram', _0: a};
 };
-var _user$project$Main$Fade = function (a) {
-	return {ctor: 'Fade', _0: a};
+var _user$project$Main$HexagramFadeIn = function (a) {
+	return {ctor: 'HexagramFadeIn', _0: a};
 };
-var _user$project$Main$update = F2(
-	function (action, model) {
-		var _p13 = action;
-		switch (_p13.ctor) {
-			case 'Consult':
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					_elm_lang$core$Native_Utils.update(
-						model,
-						{
-							phase: _user$project$Main$Fade(model.time)
-						}),
-					{ctor: '[]'});
-			case 'WindowSize':
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					_elm_lang$core$Native_Utils.update(
-						model,
-						{window: _p13._0}),
-					{ctor: '[]'});
-			case 'NewHex':
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					_elm_lang$core$Native_Utils.update(
-						model,
-						{
-							phase: _user$project$Main$Hexagram(_p13._0)
-						}),
-					{ctor: '[]'});
-			default:
-				var _p14 = A4(
-					_nphollon$update_clock$Clock$update,
-					F2(
-						function (x, y) {
-							return x + y;
-						}),
-					_p13._0,
-					model.clock,
-					model.time);
-				var clock = _p14._0;
-				var time = _p14._1;
-				var cmd = A2(_user$project$Main$phaseTransition, time, model.phase);
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{clock: clock, time: time}),
-					_1: cmd
-				};
-		}
-	});
-var _user$project$Main$Emptiness = {ctor: 'Emptiness'};
+var _user$project$Main$WaitingForHexagram = {ctor: 'WaitingForHexagram'};
+var _user$project$Main$NeedHexagram = {ctor: 'NeedHexagram'};
+var _user$project$Main$ButtonFadeOut = function (a) {
+	return {ctor: 'ButtonFadeOut', _0: a};
+};
+var _user$project$Main$JustAButton = function (a) {
+	return {ctor: 'JustAButton', _0: a};
+};
 var _user$project$Main$init = function () {
 	var defaultSize = {width: 0, height: 0};
 	return {
@@ -11631,12 +11587,94 @@ var _user$project$Main$init = function () {
 		_0: {
 			window: defaultSize,
 			clock: _nphollon$update_clock$Clock$withPeriod(33 * _elm_lang$core$Time$millisecond),
-			time: 0,
-			phase: _user$project$Main$Emptiness
+			phase: _user$project$Main$JustAButton(0)
 		},
 		_1: A2(_elm_lang$core$Task$perform, _user$project$Main$WindowSize, _elm_lang$window$Window$size)
 	};
 }();
+var _user$project$Main$animationUpdate = F2(
+	function (dt, phase) {
+		var _p12 = phase;
+		switch (_p12.ctor) {
+			case 'JustAButton':
+				return _user$project$Main$JustAButton(_p12._0 + dt);
+			case 'ButtonFadeOut':
+				var _p13 = _p12._0;
+				return (_elm_lang$core$Native_Utils.cmp(_p13.elapsed, 2 * _elm_lang$core$Time$second) > 0) ? _user$project$Main$NeedHexagram : _user$project$Main$ButtonFadeOut(
+					_elm_lang$core$Native_Utils.update(
+						_p13,
+						{elapsed: _p13.elapsed + dt}));
+			case 'NeedHexagram':
+				return _user$project$Main$NeedHexagram;
+			case 'WaitingForHexagram':
+				return _user$project$Main$WaitingForHexagram;
+			case 'HexagramFadeIn':
+				var _p14 = _p12._0;
+				return (_elm_lang$core$Native_Utils.cmp(_p14.progress, 1) > 0) ? _user$project$Main$Hexagram(_p14.hex) : _user$project$Main$HexagramFadeIn(
+					_elm_lang$core$Native_Utils.update(
+						_p14,
+						{progress: _p14.progress + 1.0e-2}));
+			default:
+				return phase;
+		}
+	});
+var _user$project$Main$timeUpdate = F2(
+	function (dt, model) {
+		var _p15 = model.phase;
+		if (_p15.ctor === 'NeedHexagram') {
+			return {
+				ctor: '_Tuple2',
+				_0: _elm_lang$core$Native_Utils.update(
+					model,
+					{phase: _user$project$Main$WaitingForHexagram}),
+				_1: A2(_elm_lang$core$Random$generate, _user$project$Main$NewHex, _user$project$Main$generator)
+			};
+		} else {
+			var _p16 = A4(_nphollon$update_clock$Clock$update, _user$project$Main$animationUpdate, dt, model.clock, model.phase);
+			var clock = _p16._0;
+			var phase = _p16._1;
+			return A2(
+				_elm_lang$core$Platform_Cmd_ops['!'],
+				_elm_lang$core$Native_Utils.update(
+					model,
+					{clock: clock, phase: phase}),
+				{ctor: '[]'});
+		}
+	});
+var _user$project$Main$update = F2(
+	function (action, model) {
+		var _p17 = action;
+		switch (_p17.ctor) {
+			case 'Consult':
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							phase: _user$project$Main$ButtonFadeOut(
+								{elapsed: 0, startTime: _p17._0})
+						}),
+					{ctor: '[]'});
+			case 'WindowSize':
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{window: _p17._0}),
+					{ctor: '[]'});
+			case 'NewHex':
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							phase: _user$project$Main$Hexagram(_p17._0)
+						}),
+					{ctor: '[]'});
+			default:
+				return A2(_user$project$Main$timeUpdate, _p17._0, model);
+		}
+	});
 var _user$project$Main$main = _elm_lang$html$Html$program(
 	{init: _user$project$Main$init, view: _user$project$Main$view, update: _user$project$Main$update, subscriptions: _user$project$Main$subscriptions})();
 

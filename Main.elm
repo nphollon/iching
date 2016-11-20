@@ -17,7 +17,7 @@ import Clock exposing (Clock)
 
 
 type Action
-    = Consult
+    = Consult Time
     | WindowSize Window.Size
     | Tick Time
     | NewHex (List Line)
@@ -25,15 +25,23 @@ type Action
 
 type alias Model =
     { clock : Clock
-    , time : Time
     , window : Window.Size
     , phase : Phase
     }
 
 
 type Phase
-    = Emptiness
-    | Fade Time
+    = JustAButton Time
+    | ButtonFadeOut
+        { startTime : Time
+        , elapsed : Time
+        }
+    | NeedHexagram
+    | WaitingForHexagram
+    | HexagramFadeIn
+        { progress : Float
+        , hex : List Line
+        }
     | Hexagram (List Line)
 
 
@@ -59,8 +67,7 @@ init =
     in
         ( { window = defaultSize
           , clock = Clock.withPeriod (33 * Time.millisecond)
-          , time = 0
-          , phase = Emptiness
+          , phase = JustAButton 0
           }
         , Task.perform WindowSize Window.size
         )
@@ -77,8 +84,15 @@ subscriptions _ =
 update : Action -> Model -> ( Model, Cmd Action )
 update action model =
     case action of
-        Consult ->
-            { model | phase = Fade model.time } ! []
+        Consult time ->
+            { model
+                | phase =
+                    ButtonFadeOut
+                        { elapsed = 0
+                        , startTime = time
+                        }
+            }
+                ! []
 
         WindowSize window ->
             { model | window = window } ! []
@@ -87,32 +101,23 @@ update action model =
             { model | phase = Hexagram hex } ! []
 
         Tick dt ->
-            let
-                ( clock, time ) =
-                    Clock.update (+) dt model.clock model.time
-
-                cmd =
-                    phaseTransition time model.phase
-            in
-                ( { model
-                    | clock = clock
-                    , time = time
-                  }
-                , cmd
-                )
+            timeUpdate dt model
 
 
-phaseTransition : Time -> Phase -> Cmd Action
-phaseTransition currentTime phase =
-    case phase of
-        Fade startTime ->
-            if (currentTime - startTime) > (2 * Time.second) then
-                Random.generate NewHex generator
-            else
-                Cmd.none
+timeUpdate : Time -> Model -> ( Model, Cmd Action )
+timeUpdate dt model =
+    case model.phase of
+        NeedHexagram ->
+            ( { model | phase = WaitingForHexagram }
+            , Random.generate NewHex generator
+            )
 
         _ ->
-            Cmd.none
+            let
+                ( clock, phase ) =
+                    Clock.update animationUpdate dt model.clock model.phase
+            in
+                { model | clock = clock, phase = phase } ! []
 
 
 generator : Random.Generator (List Line)
@@ -153,14 +158,51 @@ toLine i =
             Debug.crash "Out of range"
 
 
+animationUpdate : Time -> Phase -> Phase
+animationUpdate dt phase =
+    case phase of
+        JustAButton t ->
+            JustAButton (t + dt)
+
+        ButtonFadeOut m ->
+            if m.elapsed > 2 * Time.second then
+                NeedHexagram
+            else
+                ButtonFadeOut { m | elapsed = m.elapsed + dt }
+
+        NeedHexagram ->
+            NeedHexagram
+
+        WaitingForHexagram ->
+            WaitingForHexagram
+
+        HexagramFadeIn m ->
+            if m.progress > 1 then
+                Hexagram m.hex
+            else
+                HexagramFadeIn { m | progress = m.progress + 0.01 }
+
+        Hexagram _ ->
+            phase
+
+
 view : Model -> Html Action
 view model =
     case model.phase of
-        Emptiness ->
-            stableWobbler model.window model.time
+        JustAButton time ->
+            stableWobbler model.window time
 
-        Fade startTime ->
-            fadingWobbler model.window startTime model.time
+        ButtonFadeOut { startTime, elapsed } ->
+            fadingWobbler model.window startTime elapsed
+
+        NeedHexagram ->
+            Html.text ""
+
+        WaitingForHexagram ->
+            Html.text ""
+
+        HexagramFadeIn { progress, hex } ->
+            Html.text ""
 
         Hexagram hexagram ->
             drawHexagram model.window hexagram
@@ -185,14 +227,26 @@ frame window contents =
 
 stableWobbler : Window.Size -> Time -> Html Action
 stableWobbler window time =
-    wobbler (oscAmp time)
-        ++ [ consultButton ]
-        |> frame window
+    let
+        consultButton =
+            Svg.circle
+                [ Attr.cx "60"
+                , Attr.cy "60"
+                , Attr.r "30"
+                , Attr.fill "none"
+                , Attr.pointerEvents "visible"
+                , onClick (Consult time)
+                ]
+                []
+    in
+        wobbler (oscAmp time)
+            ++ [ consultButton ]
+            |> frame window
 
 
 fadingWobbler : Window.Size -> Time -> Time -> Html Action
-fadingWobbler window startTime currentTime =
-    fadeAmp startTime currentTime
+fadingWobbler window startTime elapsed =
+    fadeAmp startTime elapsed
         |> wobbler
         |> frame window
 
@@ -216,22 +270,22 @@ oscAmp t =
 
 
 fadeAmp : Time -> Time -> List Float
-fadeAmp startTime currentTime =
+fadeAmp startTime elapsed =
     Array.toList <|
         Array.initialize 13 <|
             \i ->
                 let
                     angle =
-                        currentTime / 500 + 0.3 * toFloat i
+                        (startTime + elapsed) / 500 + 0.3 * toFloat i
 
                     baseRadius =
                         28 - 2 * toFloat i
 
                     blackSweep =
-                        0.02 * (currentTime - startTime)
+                        0.02 * elapsed
 
                     whiteSweep =
-                        0.018 * (currentTime - startTime)
+                        0.018 * elapsed
                 in
                     if i % 2 == 0 then
                         baseRadius + 0.5 + blackSweep
@@ -258,19 +312,6 @@ wobbler amplitudes =
                 []
     in
         List.indexedMap drawCircle amplitudes
-
-
-consultButton : Svg Action
-consultButton =
-    Svg.circle
-        [ Attr.cx "60"
-        , Attr.cy "60"
-        , Attr.r "30"
-        , Attr.fill "none"
-        , Attr.pointerEvents "visible"
-        , onClick Consult
-        ]
-        []
 
 
 drawHexagram : Window.Size -> List Line -> Html a
