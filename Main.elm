@@ -1,6 +1,9 @@
 module Main exposing (main)
 
 import Array.Hamt as Array exposing (Array)
+import Color
+import Color.Manipulate
+import Color.Convert
 import Dict exposing (Dict)
 import Random
 import String
@@ -51,7 +54,11 @@ type Phase
         { progress : Float
         , hex : List Line
         }
-    | Hexagram (List Line)
+    | TextFadeIn
+        { progress : Float
+        , hex : List Line
+        }
+    | FinalState (List Line)
 
 
 type alias Line =
@@ -83,11 +90,16 @@ init =
 
 
 subscriptions : Model -> Sub Action
-subscriptions _ =
-    Sub.batch
-        [ Window.resizes WindowSize
-        , AnimationFrame.diffs Tick
-        ]
+subscriptions model =
+    case model.phase of
+        FinalState _ ->
+            Window.resizes WindowSize
+
+        _ ->
+            Sub.batch
+                [ Window.resizes WindowSize
+                , AnimationFrame.diffs Tick
+                ]
 
 
 update : Action -> Model -> ( Model, Cmd Action )
@@ -209,11 +221,17 @@ animationUpdate dt phase =
 
         HexagramMorph m ->
             if m.progress > 1 then
-                Hexagram m.hex
+                TextFadeIn { m | progress = 0 }
             else
                 HexagramMorph { m | progress = m.progress + 0.06 }
 
-        Hexagram _ ->
+        TextFadeIn m ->
+            if m.progress > 1 then
+                FinalState m.hex
+            else
+                TextFadeIn { m | progress = m.progress + 0.03 }
+
+        FinalState _ ->
             phase
 
 
@@ -246,7 +264,10 @@ view model =
                 HexagramMorph { progress, hex } ->
                     drawMorph landscape progress hex
 
-                Hexagram hexagram ->
+                TextFadeIn { progress, hex } ->
+                    drawTextFadeIn landscape progress hex
+
+                FinalState hexagram ->
                     drawHexagram landscape hexagram
 
 
@@ -429,14 +450,45 @@ drawMorph landscape progress lines =
         ]
 
 
+drawTextFadeIn : Bool -> Float -> List Line -> List (Svg a)
+drawTextFadeIn landscape progress lines =
+    let
+        opacity =
+            Attr.opacity <| toString progress
+    in
+        [ Svg.g
+            [ translate (firstPosition landscape) ]
+            (drawFirstLines lines)
+        , Svg.g
+            [ translate (firstPosition landscape)
+            , opacity
+            ]
+            (drawText (List.map Tuple.first lines))
+        , Svg.g
+            [ translate (secondPosition landscape) ]
+            (drawSecondLinesLightening progress lines)
+        , Svg.g
+            [ translate (secondPosition landscape)
+            , opacity
+            ]
+            (drawText (List.map Tuple.second lines))
+        ]
+
+
 drawHexagram : Bool -> List Line -> List (Svg a)
 drawHexagram landscape lines =
     [ Svg.g
         [ translate (firstPosition landscape) ]
-        (drawFirstSign lines)
+        (drawFirstLines lines)
+    , Svg.g
+        [ translate (firstPosition landscape) ]
+        (drawText (List.map Tuple.first lines))
     , Svg.g
         [ translate (secondPosition landscape) ]
-        (drawSecondSign lines)
+        (drawSecondLines lines)
+    , Svg.g
+        [ translate (secondPosition landscape) ]
+        (drawText (List.map Tuple.second lines))
     ]
 
 
@@ -529,24 +581,6 @@ drawLinesMorphing percent lines =
             )
 
 
-drawFirstSign : List Line -> List (Svg a)
-drawFirstSign lines =
-    let
-        text =
-            drawText (List.map Tuple.first lines)
-    in
-        drawFirstLines lines ++ text
-
-
-drawSecondSign : List Line -> List (Svg a)
-drawSecondSign lines =
-    let
-        text =
-            drawText (List.map Tuple.second lines)
-    in
-        drawSecondLines lines ++ text
-
-
 drawFirstLines : List Line -> List (Svg a)
 drawFirstLines lines =
     lines
@@ -554,6 +588,23 @@ drawFirstLines lines =
             (\i ( first, _ ) ->
                 drawHalfLine "white" 1 i first
             )
+
+
+drawSecondLinesLightening : Float -> List Line -> List (Svg a)
+drawSecondLinesLightening progress lines =
+    let
+        color =
+            Color.Convert.colorToHex <|
+                Color.Manipulate.weightedMix
+                    Color.white
+                    (Color.rgb 0 0 255)
+                    progress
+    in
+        lines
+            |> List.indexedMap
+                (\i ( _, second ) ->
+                    drawHalfLine color 1 i second
+                )
 
 
 drawSecondLines : List Line -> List (Svg a)
