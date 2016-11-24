@@ -42,23 +42,19 @@ type Phase
         }
     | NeedHexagram
     | WaitingForHexagram
-    | HexagramFadeIn
-        { progress : Float
-        , hex : List Line
-        }
-    | HexagramSplit
-        { progress : Float
-        , hex : List Line
-        }
-    | HexagramMorph
-        { progress : Float
-        , hex : List Line
-        }
-    | TextFadeIn
-        { progress : Float
-        , hex : List Line
-        }
-    | FinalState (List Line)
+    | HexagramFadeIn Animation
+    | HexagramSplit Animation
+    | HexagramMorph Animation
+    | TextFadeIn Animation
+    | NoSplitTextFadeIn Animation
+    | DoubleHexagram (List Line)
+    | SingleHexagram (List Line)
+
+
+type alias Animation =
+    { progress : Float
+    , hex : List Line
+    }
 
 
 type alias Line =
@@ -92,7 +88,10 @@ init =
 subscriptions : Model -> Sub Action
 subscriptions model =
     case model.phase of
-        FinalState _ ->
+        DoubleHexagram _ ->
+            Window.resizes WindowSize
+
+        SingleHexagram _ ->
             Window.resizes WindowSize
 
         _ ->
@@ -208,31 +207,47 @@ animationUpdate dt phase =
             WaitingForHexagram
 
         HexagramFadeIn m ->
-            if m.progress > 1 then
+            if m.progress < 1 then
+                HexagramFadeIn { m | progress = m.progress + 0.03 }
+            else if anyChanges m.hex then
                 HexagramSplit { m | progress = 0 }
             else
-                HexagramFadeIn { m | progress = m.progress + 0.03 }
+                NoSplitTextFadeIn { m | progress = 0 }
 
         HexagramSplit m ->
-            if m.progress > 1 then
-                HexagramMorph { m | progress = 0 }
-            else
+            if m.progress < 1 then
                 HexagramSplit { m | progress = m.progress + 0.03 }
+            else
+                HexagramMorph { m | progress = 0 }
 
         HexagramMorph m ->
-            if m.progress > 1 then
-                TextFadeIn { m | progress = 0 }
-            else
+            if m.progress < 1 then
                 HexagramMorph { m | progress = m.progress + 0.06 }
+            else
+                TextFadeIn { m | progress = 0 }
 
         TextFadeIn m ->
-            if m.progress > 1 then
-                FinalState m.hex
-            else
+            if m.progress < 1 then
                 TextFadeIn { m | progress = m.progress + 0.03 }
+            else
+                DoubleHexagram m.hex
 
-        FinalState _ ->
+        DoubleHexagram _ ->
             phase
+
+        NoSplitTextFadeIn m ->
+            if m.progress < 1 then
+                NoSplitTextFadeIn { m | progress = m.progress + 0.03 }
+            else
+                SingleHexagram m.hex
+
+        SingleHexagram _ ->
+            phase
+
+
+anyChanges : List Line -> Bool
+anyChanges lines =
+    List.any (uncurry xor) lines
 
 
 view : Model -> Html Action
@@ -267,8 +282,14 @@ view model =
                 TextFadeIn { progress, hex } ->
                     drawTextFadeIn landscape progress hex
 
-                FinalState hexagram ->
-                    drawHexagram landscape hexagram
+                DoubleHexagram hexagram ->
+                    drawDoubleHexagram landscape hexagram
+
+                NoSplitTextFadeIn { progress, hex } ->
+                    drawNoSplitTextFadeIn progress hex
+
+                SingleHexagram hexagram ->
+                    drawSingleHexagram hexagram
 
 
 frame : Window.Size -> List (Svg a) -> Html a
@@ -475,8 +496,8 @@ drawTextFadeIn landscape progress lines =
         ]
 
 
-drawHexagram : Bool -> List Line -> List (Svg a)
-drawHexagram landscape lines =
+drawDoubleHexagram : Bool -> List Line -> List (Svg a)
+drawDoubleHexagram landscape lines =
     [ Svg.g
         [ translate (firstPosition landscape) ]
         (drawFirstLines lines)
@@ -489,6 +510,30 @@ drawHexagram landscape lines =
     , Svg.g
         [ translate (secondPosition landscape) ]
         (drawText (List.map Tuple.second lines))
+    ]
+
+
+drawNoSplitTextFadeIn : Float -> List Line -> List (Svg a)
+drawNoSplitTextFadeIn progress lines =
+    [ Svg.g
+        [ translate centerPosition ]
+        (drawFirstLines lines)
+    , Svg.g
+        [ translate centerPosition
+        , Attr.opacity <| toString progress
+        ]
+        (drawText (List.map Tuple.first lines))
+    ]
+
+
+drawSingleHexagram : List Line -> List (Svg a)
+drawSingleHexagram lines =
+    [ Svg.g
+        [ translate centerPosition ]
+        (drawFirstLines lines)
+    , Svg.g
+        [ translate centerPosition ]
+        (drawText (List.map Tuple.first lines))
     ]
 
 

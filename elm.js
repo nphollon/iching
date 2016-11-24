@@ -12369,7 +12369,65 @@ var _user$project$Main$mix = F3(
 			_1: A2(m, _p19._1, _p20._1)
 		};
 	});
-var _user$project$Main$drawHexagram = F2(
+var _user$project$Main$drawSingleHexagram = function (lines) {
+	return {
+		ctor: '::',
+		_0: A2(
+			_elm_lang$svg$Svg$g,
+			{
+				ctor: '::',
+				_0: _user$project$Main$translate(_user$project$Main$centerPosition),
+				_1: {ctor: '[]'}
+			},
+			_user$project$Main$drawFirstLines(lines)),
+		_1: {
+			ctor: '::',
+			_0: A2(
+				_elm_lang$svg$Svg$g,
+				{
+					ctor: '::',
+					_0: _user$project$Main$translate(_user$project$Main$centerPosition),
+					_1: {ctor: '[]'}
+				},
+				_user$project$Main$drawText(
+					A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, lines))),
+			_1: {ctor: '[]'}
+		}
+	};
+};
+var _user$project$Main$drawNoSplitTextFadeIn = F2(
+	function (progress, lines) {
+		return {
+			ctor: '::',
+			_0: A2(
+				_elm_lang$svg$Svg$g,
+				{
+					ctor: '::',
+					_0: _user$project$Main$translate(_user$project$Main$centerPosition),
+					_1: {ctor: '[]'}
+				},
+				_user$project$Main$drawFirstLines(lines)),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$svg$Svg$g,
+					{
+						ctor: '::',
+						_0: _user$project$Main$translate(_user$project$Main$centerPosition),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$svg$Svg_Attributes$opacity(
+								_elm_lang$core$Basics$toString(progress)),
+							_1: {ctor: '[]'}
+						}
+					},
+					_user$project$Main$drawText(
+						A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, lines))),
+				_1: {ctor: '[]'}
+			}
+		};
+	});
+var _user$project$Main$drawDoubleHexagram = F2(
 	function (landscape, lines) {
 		return {
 			ctor: '::',
@@ -12727,6 +12785,12 @@ var _user$project$Main$frame = F2(
 				_1: {ctor: '[]'}
 			});
 	});
+var _user$project$Main$anyChanges = function (lines) {
+	return A2(
+		_elm_lang$core$List$any,
+		_elm_lang$core$Basics$uncurry(_elm_lang$core$Basics$xor),
+		lines);
+};
 var _user$project$Main$toLine = function (i) {
 	var _p21 = i;
 	switch (_p21) {
@@ -12750,8 +12814,8 @@ var _user$project$Main$toLine = function (i) {
 			return _elm_lang$core$Native_Utils.crashCase(
 				'Main',
 				{
-					start: {line: 163, column: 5},
-					end: {line: 189, column: 39}
+					start: {line: 162, column: 5},
+					end: {line: 188, column: 39}
 				},
 				_p21)('Out of range');
 	}
@@ -12759,6 +12823,10 @@ var _user$project$Main$toLine = function (i) {
 var _user$project$Main$Model = F3(
 	function (a, b, c) {
 		return {clock: a, window: b, phase: c};
+	});
+var _user$project$Main$Animation = F2(
+	function (a, b) {
+		return {progress: a, hex: b};
 	});
 var _user$project$Main$Dimensions = F4(
 	function (a, b, c, d) {
@@ -12775,19 +12843,22 @@ var _user$project$Main$WindowSize = function (a) {
 };
 var _user$project$Main$subscriptions = function (model) {
 	var _p23 = model.phase;
-	if (_p23.ctor === 'FinalState') {
-		return _elm_lang$window$Window$resizes(_user$project$Main$WindowSize);
-	} else {
-		return _elm_lang$core$Platform_Sub$batch(
-			{
-				ctor: '::',
-				_0: _elm_lang$window$Window$resizes(_user$project$Main$WindowSize),
-				_1: {
+	switch (_p23.ctor) {
+		case 'DoubleHexagram':
+			return _elm_lang$window$Window$resizes(_user$project$Main$WindowSize);
+		case 'SingleHexagram':
+			return _elm_lang$window$Window$resizes(_user$project$Main$WindowSize);
+		default:
+			return _elm_lang$core$Platform_Sub$batch(
+				{
 					ctor: '::',
-					_0: _elm_lang$animation_frame$AnimationFrame$diffs(_user$project$Main$Tick),
-					_1: {ctor: '[]'}
-				}
-			});
+					_0: _elm_lang$window$Window$resizes(_user$project$Main$WindowSize),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$animation_frame$AnimationFrame$diffs(_user$project$Main$Tick),
+						_1: {ctor: '[]'}
+					}
+				});
 	}
 };
 var _user$project$Main$Consult = function (a) {
@@ -12857,13 +12928,23 @@ var _user$project$Main$view = function (model) {
 					return A3(_user$project$Main$drawMorph, landscape, _p24._0.progress, _p24._0.hex);
 				case 'TextFadeIn':
 					return A3(_user$project$Main$drawTextFadeIn, landscape, _p24._0.progress, _p24._0.hex);
+				case 'DoubleHexagram':
+					return A2(_user$project$Main$drawDoubleHexagram, landscape, _p24._0);
+				case 'NoSplitTextFadeIn':
+					return A2(_user$project$Main$drawNoSplitTextFadeIn, _p24._0.progress, _p24._0.hex);
 				default:
-					return A2(_user$project$Main$drawHexagram, landscape, _p24._0);
+					return _user$project$Main$drawSingleHexagram(_p24._0);
 			}
 		}());
 };
-var _user$project$Main$FinalState = function (a) {
-	return {ctor: 'FinalState', _0: a};
+var _user$project$Main$SingleHexagram = function (a) {
+	return {ctor: 'SingleHexagram', _0: a};
+};
+var _user$project$Main$DoubleHexagram = function (a) {
+	return {ctor: 'DoubleHexagram', _0: a};
+};
+var _user$project$Main$NoSplitTextFadeIn = function (a) {
+	return {ctor: 'NoSplitTextFadeIn', _0: a};
 };
 var _user$project$Main$TextFadeIn = function (a) {
 	return {ctor: 'TextFadeIn', _0: a};
@@ -12934,50 +13015,61 @@ var _user$project$Main$animationUpdate = F2(
 				return _user$project$Main$WaitingForHexagram;
 			case 'HexagramFadeIn':
 				var _p27 = _p25._0;
-				return (_elm_lang$core$Native_Utils.cmp(_p27.progress, 1) > 0) ? _user$project$Main$HexagramSplit(
+				return (_elm_lang$core$Native_Utils.cmp(_p27.progress, 1) < 0) ? _user$project$Main$HexagramFadeIn(
 					_elm_lang$core$Native_Utils.update(
 						_p27,
-						{progress: 0})) : _user$project$Main$HexagramFadeIn(
+						{progress: _p27.progress + 3.0e-2})) : (_user$project$Main$anyChanges(_p27.hex) ? _user$project$Main$HexagramSplit(
 					_elm_lang$core$Native_Utils.update(
 						_p27,
-						{progress: _p27.progress + 3.0e-2}));
+						{progress: 0})) : _user$project$Main$NoSplitTextFadeIn(
+					_elm_lang$core$Native_Utils.update(
+						_p27,
+						{progress: 0})));
 			case 'HexagramSplit':
 				var _p28 = _p25._0;
-				return (_elm_lang$core$Native_Utils.cmp(_p28.progress, 1) > 0) ? _user$project$Main$HexagramMorph(
+				return (_elm_lang$core$Native_Utils.cmp(_p28.progress, 1) < 0) ? _user$project$Main$HexagramSplit(
 					_elm_lang$core$Native_Utils.update(
 						_p28,
-						{progress: 0})) : _user$project$Main$HexagramSplit(
+						{progress: _p28.progress + 3.0e-2})) : _user$project$Main$HexagramMorph(
 					_elm_lang$core$Native_Utils.update(
 						_p28,
-						{progress: _p28.progress + 3.0e-2}));
+						{progress: 0}));
 			case 'HexagramMorph':
 				var _p29 = _p25._0;
-				return (_elm_lang$core$Native_Utils.cmp(_p29.progress, 1) > 0) ? _user$project$Main$TextFadeIn(
+				return (_elm_lang$core$Native_Utils.cmp(_p29.progress, 1) < 0) ? _user$project$Main$HexagramMorph(
 					_elm_lang$core$Native_Utils.update(
 						_p29,
-						{progress: 0})) : _user$project$Main$HexagramMorph(
+						{progress: _p29.progress + 6.0e-2})) : _user$project$Main$TextFadeIn(
 					_elm_lang$core$Native_Utils.update(
 						_p29,
-						{progress: _p29.progress + 6.0e-2}));
+						{progress: 0}));
 			case 'TextFadeIn':
 				var _p30 = _p25._0;
-				return (_elm_lang$core$Native_Utils.cmp(_p30.progress, 1) > 0) ? _user$project$Main$FinalState(_p30.hex) : _user$project$Main$TextFadeIn(
+				return (_elm_lang$core$Native_Utils.cmp(_p30.progress, 1) < 0) ? _user$project$Main$TextFadeIn(
 					_elm_lang$core$Native_Utils.update(
 						_p30,
-						{progress: _p30.progress + 3.0e-2}));
+						{progress: _p30.progress + 3.0e-2})) : _user$project$Main$DoubleHexagram(_p30.hex);
+			case 'DoubleHexagram':
+				return phase;
+			case 'NoSplitTextFadeIn':
+				var _p31 = _p25._0;
+				return (_elm_lang$core$Native_Utils.cmp(_p31.progress, 1) < 0) ? _user$project$Main$NoSplitTextFadeIn(
+					_elm_lang$core$Native_Utils.update(
+						_p31,
+						{progress: _p31.progress + 3.0e-2})) : _user$project$Main$SingleHexagram(_p31.hex);
 			default:
 				return phase;
 		}
 	});
 var _user$project$Main$timeUpdate = F2(
 	function (dt, model) {
-		var _p31 = model.phase;
-		if (_p31.ctor === 'NeedHexagram') {
+		var _p32 = model.phase;
+		if (_p32.ctor === 'NeedHexagram') {
 			return _user$project$Main$requestHexagram(model);
 		} else {
-			var _p32 = A4(_nphollon$update_clock$Clock$update, _user$project$Main$animationUpdate, dt, model.clock, model.phase);
-			var clock = _p32._0;
-			var phase = _p32._1;
+			var _p33 = A4(_nphollon$update_clock$Clock$update, _user$project$Main$animationUpdate, dt, model.clock, model.phase);
+			var clock = _p33._0;
+			var phase = _p33._1;
 			return A2(
 				_elm_lang$core$Platform_Cmd_ops['!'],
 				_elm_lang$core$Native_Utils.update(
@@ -12988,8 +13080,8 @@ var _user$project$Main$timeUpdate = F2(
 	});
 var _user$project$Main$update = F2(
 	function (action, model) {
-		var _p33 = action;
-		switch (_p33.ctor) {
+		var _p34 = action;
+		switch (_p34.ctor) {
 			case 'Consult':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
@@ -12997,7 +13089,7 @@ var _user$project$Main$update = F2(
 						model,
 						{
 							phase: _user$project$Main$ButtonFadeOut(
-								{elapsed: 0, startTime: _p33._0})
+								{elapsed: 0, startTime: _p34._0})
 						}),
 					{ctor: '[]'});
 			case 'WindowSize':
@@ -13005,7 +13097,7 @@ var _user$project$Main$update = F2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					_elm_lang$core$Native_Utils.update(
 						model,
-						{window: _p33._0}),
+						{window: _p34._0}),
 					{ctor: '[]'});
 			case 'NewHex':
 				return A2(
@@ -13014,11 +13106,11 @@ var _user$project$Main$update = F2(
 						model,
 						{
 							phase: _user$project$Main$HexagramFadeIn(
-								{progress: 0, hex: _p33._0})
+								{progress: 0, hex: _p34._0})
 						}),
 					{ctor: '[]'});
 			default:
-				return A2(_user$project$Main$timeUpdate, _p33._0, model);
+				return A2(_user$project$Main$timeUpdate, _p34._0, model);
 		}
 	});
 var _user$project$Main$main = _elm_lang$html$Html$program(
