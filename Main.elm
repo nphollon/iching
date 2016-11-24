@@ -47,6 +47,10 @@ type Phase
         { progress : Float
         , hex : List Line
         }
+    | HexagramMorph
+        { progress : Float
+        , hex : List Line
+        }
     | Hexagram (List Line)
 
 
@@ -199,9 +203,15 @@ animationUpdate dt phase =
 
         HexagramSplit m ->
             if m.progress > 1 then
-                Hexagram m.hex
+                HexagramMorph { m | progress = 0 }
             else
                 HexagramSplit { m | progress = m.progress + 0.03 }
+
+        HexagramMorph m ->
+            if m.progress > 1 then
+                Hexagram m.hex
+            else
+                HexagramMorph { m | progress = m.progress + 0.06 }
 
         Hexagram _ ->
             phase
@@ -233,6 +243,9 @@ view model =
                 HexagramSplit { progress, hex } ->
                     drawSplit landscape progress hex
 
+                HexagramMorph { progress, hex } ->
+                    drawMorph landscape progress hex
+
                 Hexagram hexagram ->
                     drawHexagram landscape hexagram
 
@@ -258,23 +271,6 @@ frame window contents =
             ]
 
 
-type alias Dimensions =
-    { width : Int
-    , height : Int
-    , outerMargin : Int
-    , innerMargin : Int
-    }
-
-
-dims : Dimensions
-dims =
-    { width = 120
-    , height = 151
-    , outerMargin = 5
-    , innerMargin = 5
-    }
-
-
 viewBox : Bool -> Attribute a
 viewBox landscape =
     let
@@ -296,43 +292,6 @@ viewBox landscape =
             |> List.map toString
             |> String.join " "
             |> Attr.viewBox
-
-
-firstPosition : Bool -> ( Int, Int )
-firstPosition landscape =
-    if landscape then
-        ( -dims.width - dims.innerMargin, -dims.height // 2 )
-    else
-        ( -dims.width // 2, -dims.height - dims.innerMargin )
-
-
-secondPosition : Bool -> ( Int, Int )
-secondPosition landscape =
-    if landscape then
-        ( dims.innerMargin, -dims.height // 2 )
-    else
-        ( -dims.width // 2, dims.innerMargin )
-
-
-centerPosition : ( Int, Int )
-centerPosition =
-    ( -dims.width // 2, -dims.height // 2 )
-
-
-mix : Float -> ( Int, Int ) -> ( Int, Int ) -> ( Float, Float )
-mix percent ( x1, y1 ) ( x2, y2 ) =
-    let
-        m u v =
-            (1 - percent) * toFloat u + percent * toFloat v
-    in
-        ( m x1 x2, m y1 y2 )
-
-
-translate : ( number, number_ ) -> Attribute a
-translate ( x, y ) =
-    [ "translate(", toString x, ",", toString y, ")" ]
-        |> String.concat
-        |> Attr.transform
 
 
 stableWobbler : Time -> List (Svg Action)
@@ -426,12 +385,10 @@ drawFadeIn progress lines =
     let
         percent =
             min 1 (Ease.inOutQuad progress)
-
-        graphic =
-            List.map Tuple.first lines
-                |> drawLinesFadingIn percent
     in
-        [ Svg.g [ translate centerPosition ] [ graphic ] ]
+        [ Svg.g [ translate centerPosition ]
+            (drawLinesFadingIn percent lines)
+        ]
 
 
 drawSplit : Bool -> Float -> List Line -> List (Svg a)
@@ -440,9 +397,6 @@ drawSplit landscape progress lines =
         percent =
             min 1 (Ease.inOutQuint progress)
 
-        firstLines =
-            List.map Tuple.first lines
-
         towardsFirstPosition =
             mix percent centerPosition (firstPosition landscape)
 
@@ -450,65 +404,193 @@ drawSplit landscape progress lines =
             mix percent centerPosition (secondPosition landscape)
     in
         [ Svg.g [ translate towardsSecondPosition ]
-            [ drawLinesSplitting firstLines ]
+            (drawLinesSplitting lines)
         , Svg.g [ translate towardsFirstPosition ]
-            [ drawLines firstLines ]
+            (drawFirstLines lines)
+        ]
+
+
+drawMorph : Bool -> Float -> List Line -> List (Svg a)
+drawMorph landscape progress lines =
+    let
+        percent =
+            min 1 (Ease.outQuad progress)
+
+        towardsFirstPosition =
+            mix percent centerPosition (firstPosition landscape)
+
+        towardsSecondPosition =
+            mix percent centerPosition (secondPosition landscape)
+    in
+        [ Svg.g [ translate (secondPosition landscape) ]
+            (drawLinesMorphing percent lines)
+        , Svg.g [ translate (firstPosition landscape) ]
+            (drawFirstLines lines)
         ]
 
 
 drawHexagram : Bool -> List Line -> List (Svg a)
 drawHexagram landscape lines =
+    [ Svg.g
+        [ translate (firstPosition landscape) ]
+        (drawFirstSign lines)
+    , Svg.g
+        [ translate (secondPosition landscape) ]
+        (drawSecondSign lines)
+    ]
+
+
+mix : Float -> ( Int, Int ) -> ( Int, Int ) -> ( Float, Float )
+mix percent ( x1, y1 ) ( x2, y2 ) =
     let
-        ( before, changes, after ) =
-            List.foldr splitLine ( [], [], [] ) lines
-
-        beforeGraphic =
-            Svg.g
-                [ translate (firstPosition landscape) ]
-                [ drawLines before
-                , drawText before
-                ]
-
-        afterGraphic =
-            Svg.g
-                [ translate (secondPosition landscape) ]
-                [ drawLines after
-                , drawText after
-                ]
+        m u v =
+            (1 - percent) * toFloat u + percent * toFloat v
     in
-        [ beforeGraphic
-        , afterGraphic
-        ]
+        ( m x1 x2, m y1 y2 )
 
 
-type alias Triple a =
-    ( a, a, a )
+translate : ( number, number_ ) -> Attribute a
+translate ( x, y ) =
+    [ "translate(", toString x, ",", toString y, ")" ]
+        |> String.concat
+        |> Attr.transform
 
 
-splitLine : Line -> Triple (List Bool) -> Triple (List Bool)
-splitLine ( before, after ) ( befores, changes, afters ) =
-    ( before :: befores
-    , xor before after :: changes
-    , after :: afters
-    )
+firstPosition : Bool -> ( Int, Int )
+firstPosition landscape =
+    if landscape then
+        ( -dims.width - dims.innerMargin, -dims.height // 2 )
+    else
+        ( -dims.width // 2, -dims.height - dims.innerMargin )
 
 
-drawLinesFadingIn : Float -> List Bool -> Svg a
-drawLinesFadingIn percent halfLines =
-    Svg.g []
-        (List.indexedMap (drawHalfLine "white" percent) halfLines)
+secondPosition : Bool -> ( Int, Int )
+secondPosition landscape =
+    if landscape then
+        ( dims.innerMargin, -dims.height // 2 )
+    else
+        ( -dims.width // 2, dims.innerMargin )
 
 
-drawLinesSplitting : List Bool -> Svg a
-drawLinesSplitting halfLines =
-    Svg.g []
-        (List.indexedMap (drawHalfLine "blue" 1) halfLines)
+centerPosition : ( Int, Int )
+centerPosition =
+    ( -dims.width // 2, -dims.height // 2 )
 
 
-drawLines : List Bool -> Svg a
-drawLines halfLines =
-    Svg.g []
-        (List.indexedMap (drawHalfLine "white" 1) halfLines)
+type alias Dimensions =
+    { width : Int
+    , height : Int
+    , outerMargin : Int
+    , innerMargin : Int
+    }
+
+
+dims : Dimensions
+dims =
+    { width = 120
+    , height = 151
+    , outerMargin = 5
+    , innerMargin = 5
+    }
+
+
+drawLinesFadingIn : Float -> List Line -> List (Svg a)
+drawLinesFadingIn percent lines =
+    lines
+        |> List.indexedMap
+            (\i ( first, _ ) ->
+                drawHalfLine "white" percent i first
+            )
+
+
+drawLinesSplitting : List Line -> List (Svg a)
+drawLinesSplitting lines =
+    lines
+        |> List.indexedMap
+            (\i ( first, _ ) ->
+                drawHalfLine "blue" 1 i first
+            )
+
+
+drawLinesMorphing : Float -> List Line -> List (Svg a)
+drawLinesMorphing percent lines =
+    lines
+        |> List.indexedMap
+            (\i ( first, second ) ->
+                case ( first, second ) of
+                    ( True, False ) ->
+                        drawHalfLineMorphing (1 - percent) i
+
+                    ( False, True ) ->
+                        drawHalfLineMorphing percent i
+
+                    _ ->
+                        drawHalfLine "blue" 1 i first
+            )
+
+
+drawFirstSign : List Line -> List (Svg a)
+drawFirstSign lines =
+    let
+        text =
+            drawText (List.map Tuple.first lines)
+    in
+        drawFirstLines lines ++ text
+
+
+drawSecondSign : List Line -> List (Svg a)
+drawSecondSign lines =
+    let
+        text =
+            drawText (List.map Tuple.second lines)
+    in
+        drawSecondLines lines ++ text
+
+
+drawFirstLines : List Line -> List (Svg a)
+drawFirstLines lines =
+    lines
+        |> List.indexedMap
+            (\i ( first, _ ) ->
+                drawHalfLine "white" 1 i first
+            )
+
+
+drawSecondLines : List Line -> List (Svg a)
+drawSecondLines lines =
+    lines
+        |> List.indexedMap
+            (\i ( _, second ) ->
+                drawHalfLine "white" 1 i second
+            )
+
+
+drawHalfLineMorphing : Float -> Int -> Svg a
+drawHalfLineMorphing percent index =
+    let
+        height =
+            9
+
+        yOffset =
+            15 * toFloat index + 5
+
+        xOffset =
+            5 * percent
+
+        rect x width =
+            Svg.rect
+                [ Attr.y <| toString yOffset
+                , Attr.height <| toString height
+                , Attr.x <| toString x
+                , Attr.width <| toString width
+                , Attr.fill "blue"
+                ]
+                []
+    in
+        Svg.g []
+            [ rect 20 (25 + xOffset)
+            , rect (55 - xOffset) (25 + xOffset)
+            ]
 
 
 drawHalfLine : String -> Float -> Int -> Bool -> Svg a
@@ -545,7 +627,7 @@ drawHalfLine color percent index isYang =
                 ]
 
 
-drawText : List Bool -> Svg a
+drawText : List Bool -> List (Svg a)
 drawText halfLines =
     let
         fromBinary =
@@ -590,7 +672,7 @@ drawText halfLines =
             String.lines name
                 |> List.map2 titleLine [ "125", "140" ]
     in
-        Svg.g [] <| numberLine :: title
+        numberLine :: title
 
 
 signDetails : Dict Int ( Int, String )

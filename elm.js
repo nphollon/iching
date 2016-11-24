@@ -11285,10 +11285,7 @@ var _user$project$Main$drawText = function (halfLines) {
 			}
 		},
 		_elm_lang$core$String$lines(name));
-	return A2(
-		_elm_lang$svg$Svg$g,
-		{ctor: '[]'},
-		{ctor: '::', _0: numberLine, _1: title});
+	return {ctor: '::', _0: numberLine, _1: title};
 };
 var _user$project$Main$drawHalfLine = F4(
 	function (color, percent, index, isYang) {
@@ -11340,49 +11337,320 @@ var _user$project$Main$drawHalfLine = F4(
 				}
 			});
 	});
-var _user$project$Main$drawLines = function (halfLines) {
-	return A2(
-		_elm_lang$svg$Svg$g,
-		{ctor: '[]'},
-		A2(
-			_elm_lang$core$List$indexedMap,
-			A2(_user$project$Main$drawHalfLine, 'white', 1),
-			halfLines));
-};
-var _user$project$Main$drawLinesSplitting = function (halfLines) {
-	return A2(
-		_elm_lang$svg$Svg$g,
-		{ctor: '[]'},
-		A2(
-			_elm_lang$core$List$indexedMap,
-			A2(_user$project$Main$drawHalfLine, 'blue', 1),
-			halfLines));
-};
-var _user$project$Main$drawLinesFadingIn = F2(
-	function (percent, halfLines) {
+var _user$project$Main$drawHalfLineMorphing = F2(
+	function (percent, index) {
+		var xOffset = 5 * percent;
+		var yOffset = (15 * _elm_lang$core$Basics$toFloat(index)) + 5;
+		var height = 9;
+		var rect = F2(
+			function (x, width) {
+				return A2(
+					_elm_lang$svg$Svg$rect,
+					{
+						ctor: '::',
+						_0: _elm_lang$svg$Svg_Attributes$y(
+							_elm_lang$core$Basics$toString(yOffset)),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$svg$Svg_Attributes$height(
+								_elm_lang$core$Basics$toString(height)),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$svg$Svg_Attributes$x(
+									_elm_lang$core$Basics$toString(x)),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$svg$Svg_Attributes$width(
+										_elm_lang$core$Basics$toString(width)),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$svg$Svg_Attributes$fill('blue'),
+										_1: {ctor: '[]'}
+									}
+								}
+							}
+						}
+					},
+					{ctor: '[]'});
+			});
 		return A2(
 			_elm_lang$svg$Svg$g,
 			{ctor: '[]'},
-			A2(
-				_elm_lang$core$List$indexedMap,
-				A2(_user$project$Main$drawHalfLine, 'white', percent),
-				halfLines));
+			{
+				ctor: '::',
+				_0: A2(rect, 20, 25 + xOffset),
+				_1: {
+					ctor: '::',
+					_0: A2(rect, 55 - xOffset, 25 + xOffset),
+					_1: {ctor: '[]'}
+				}
+			});
 	});
-var _user$project$Main$splitLine = F2(
-	function (_p2, _p1) {
-		var _p3 = _p2;
-		var _p6 = _p3._0;
-		var _p5 = _p3._1;
-		var _p4 = _p1;
+var _user$project$Main$drawSecondLines = function (lines) {
+	return A2(
+		_elm_lang$core$List$indexedMap,
+		F2(
+			function (i, _p1) {
+				var _p2 = _p1;
+				return A4(_user$project$Main$drawHalfLine, 'white', 1, i, _p2._1);
+			}),
+		lines);
+};
+var _user$project$Main$drawFirstLines = function (lines) {
+	return A2(
+		_elm_lang$core$List$indexedMap,
+		F2(
+			function (i, _p3) {
+				var _p4 = _p3;
+				return A4(_user$project$Main$drawHalfLine, 'white', 1, i, _p4._0);
+			}),
+		lines);
+};
+var _user$project$Main$drawSecondSign = function (lines) {
+	var text = _user$project$Main$drawText(
+		A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, lines));
+	return A2(
+		_elm_lang$core$Basics_ops['++'],
+		_user$project$Main$drawSecondLines(lines),
+		text);
+};
+var _user$project$Main$drawFirstSign = function (lines) {
+	var text = _user$project$Main$drawText(
+		A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, lines));
+	return A2(
+		_elm_lang$core$Basics_ops['++'],
+		_user$project$Main$drawFirstLines(lines),
+		text);
+};
+var _user$project$Main$drawLinesMorphing = F2(
+	function (percent, lines) {
+		return A2(
+			_elm_lang$core$List$indexedMap,
+			F2(
+				function (i, _p5) {
+					var _p6 = _p5;
+					var _p8 = _p6._0;
+					var _p7 = {ctor: '_Tuple2', _0: _p8, _1: _p6._1};
+					_v3_2:
+					do {
+						if (_p7.ctor === '_Tuple2') {
+							if (_p7._0 === true) {
+								if (_p7._1 === false) {
+									return A2(_user$project$Main$drawHalfLineMorphing, 1 - percent, i);
+								} else {
+									break _v3_2;
+								}
+							} else {
+								if (_p7._1 === true) {
+									return A2(_user$project$Main$drawHalfLineMorphing, percent, i);
+								} else {
+									break _v3_2;
+								}
+							}
+						} else {
+							break _v3_2;
+						}
+					} while(false);
+					return A4(_user$project$Main$drawHalfLine, 'blue', 1, i, _p8);
+				}),
+			lines);
+	});
+var _user$project$Main$drawLinesSplitting = function (lines) {
+	return A2(
+		_elm_lang$core$List$indexedMap,
+		F2(
+			function (i, _p9) {
+				var _p10 = _p9;
+				return A4(_user$project$Main$drawHalfLine, 'blue', 1, i, _p10._0);
+			}),
+		lines);
+};
+var _user$project$Main$drawLinesFadingIn = F2(
+	function (percent, lines) {
+		return A2(
+			_elm_lang$core$List$indexedMap,
+			F2(
+				function (i, _p11) {
+					var _p12 = _p11;
+					return A4(_user$project$Main$drawHalfLine, 'white', percent, i, _p12._0);
+				}),
+			lines);
+	});
+var _user$project$Main$dims = {width: 120, height: 151, outerMargin: 5, innerMargin: 5};
+var _user$project$Main$centerPosition = {ctor: '_Tuple2', _0: ((0 - _user$project$Main$dims.width) / 2) | 0, _1: ((0 - _user$project$Main$dims.height) / 2) | 0};
+var _user$project$Main$secondPosition = function (landscape) {
+	return landscape ? {ctor: '_Tuple2', _0: _user$project$Main$dims.innerMargin, _1: ((0 - _user$project$Main$dims.height) / 2) | 0} : {ctor: '_Tuple2', _0: ((0 - _user$project$Main$dims.width) / 2) | 0, _1: _user$project$Main$dims.innerMargin};
+};
+var _user$project$Main$firstPosition = function (landscape) {
+	return landscape ? {ctor: '_Tuple2', _0: (0 - _user$project$Main$dims.width) - _user$project$Main$dims.innerMargin, _1: ((0 - _user$project$Main$dims.height) / 2) | 0} : {ctor: '_Tuple2', _0: ((0 - _user$project$Main$dims.width) / 2) | 0, _1: (0 - _user$project$Main$dims.height) - _user$project$Main$dims.innerMargin};
+};
+var _user$project$Main$translate = function (_p13) {
+	var _p14 = _p13;
+	return _elm_lang$svg$Svg_Attributes$transform(
+		_elm_lang$core$String$concat(
+			{
+				ctor: '::',
+				_0: 'translate(',
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$core$Basics$toString(_p14._0),
+					_1: {
+						ctor: '::',
+						_0: ',',
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$core$Basics$toString(_p14._1),
+							_1: {
+								ctor: '::',
+								_0: ')',
+								_1: {ctor: '[]'}
+							}
+						}
+					}
+				}
+			}));
+};
+var _user$project$Main$mix = F3(
+	function (percent, _p16, _p15) {
+		var _p17 = _p16;
+		var _p18 = _p15;
+		var m = F2(
+			function (u, v) {
+				return ((1 - percent) * _elm_lang$core$Basics$toFloat(u)) + (percent * _elm_lang$core$Basics$toFloat(v));
+			});
 		return {
-			ctor: '_Tuple3',
-			_0: {ctor: '::', _0: _p6, _1: _p4._0},
+			ctor: '_Tuple2',
+			_0: A2(m, _p17._0, _p18._0),
+			_1: A2(m, _p17._1, _p18._1)
+		};
+	});
+var _user$project$Main$drawHexagram = F2(
+	function (landscape, lines) {
+		return {
+			ctor: '::',
+			_0: A2(
+				_elm_lang$svg$Svg$g,
+				{
+					ctor: '::',
+					_0: _user$project$Main$translate(
+						_user$project$Main$firstPosition(landscape)),
+					_1: {ctor: '[]'}
+				},
+				_user$project$Main$drawFirstSign(lines)),
 			_1: {
 				ctor: '::',
-				_0: A2(_elm_lang$core$Basics$xor, _p6, _p5),
-				_1: _p4._1
-			},
-			_2: {ctor: '::', _0: _p5, _1: _p4._2}
+				_0: A2(
+					_elm_lang$svg$Svg$g,
+					{
+						ctor: '::',
+						_0: _user$project$Main$translate(
+							_user$project$Main$secondPosition(landscape)),
+						_1: {ctor: '[]'}
+					},
+					_user$project$Main$drawSecondSign(lines)),
+				_1: {ctor: '[]'}
+			}
+		};
+	});
+var _user$project$Main$drawMorph = F3(
+	function (landscape, progress, lines) {
+		var percent = A2(
+			_elm_lang$core$Basics$min,
+			1,
+			_elm_community$easing_functions$Ease$outQuad(progress));
+		var towardsFirstPosition = A3(
+			_user$project$Main$mix,
+			percent,
+			_user$project$Main$centerPosition,
+			_user$project$Main$firstPosition(landscape));
+		var towardsSecondPosition = A3(
+			_user$project$Main$mix,
+			percent,
+			_user$project$Main$centerPosition,
+			_user$project$Main$secondPosition(landscape));
+		return {
+			ctor: '::',
+			_0: A2(
+				_elm_lang$svg$Svg$g,
+				{
+					ctor: '::',
+					_0: _user$project$Main$translate(
+						_user$project$Main$secondPosition(landscape)),
+					_1: {ctor: '[]'}
+				},
+				A2(_user$project$Main$drawLinesMorphing, percent, lines)),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$svg$Svg$g,
+					{
+						ctor: '::',
+						_0: _user$project$Main$translate(
+							_user$project$Main$firstPosition(landscape)),
+						_1: {ctor: '[]'}
+					},
+					_user$project$Main$drawFirstLines(lines)),
+				_1: {ctor: '[]'}
+			}
+		};
+	});
+var _user$project$Main$drawSplit = F3(
+	function (landscape, progress, lines) {
+		var percent = A2(
+			_elm_lang$core$Basics$min,
+			1,
+			_elm_community$easing_functions$Ease$inOutQuint(progress));
+		var towardsFirstPosition = A3(
+			_user$project$Main$mix,
+			percent,
+			_user$project$Main$centerPosition,
+			_user$project$Main$firstPosition(landscape));
+		var towardsSecondPosition = A3(
+			_user$project$Main$mix,
+			percent,
+			_user$project$Main$centerPosition,
+			_user$project$Main$secondPosition(landscape));
+		return {
+			ctor: '::',
+			_0: A2(
+				_elm_lang$svg$Svg$g,
+				{
+					ctor: '::',
+					_0: _user$project$Main$translate(towardsSecondPosition),
+					_1: {ctor: '[]'}
+				},
+				_user$project$Main$drawLinesSplitting(lines)),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$svg$Svg$g,
+					{
+						ctor: '::',
+						_0: _user$project$Main$translate(towardsFirstPosition),
+						_1: {ctor: '[]'}
+					},
+					_user$project$Main$drawFirstLines(lines)),
+				_1: {ctor: '[]'}
+			}
+		};
+	});
+var _user$project$Main$drawFadeIn = F2(
+	function (progress, lines) {
+		var percent = A2(
+			_elm_lang$core$Basics$min,
+			1,
+			_elm_community$easing_functions$Ease$inOutQuad(progress));
+		return {
+			ctor: '::',
+			_0: A2(
+				_elm_lang$svg$Svg$g,
+				{
+					ctor: '::',
+					_0: _user$project$Main$translate(_user$project$Main$centerPosition),
+					_1: {ctor: '[]'}
+				},
+				A2(_user$project$Main$drawLinesFadingIn, percent, lines)),
+			_1: {ctor: '[]'}
 		};
 	});
 var _user$project$Main$wobbler = function (amplitudes) {
@@ -11452,47 +11720,6 @@ var _user$project$Main$fadingWobbler = F2(
 		return _user$project$Main$wobbler(
 			A2(_user$project$Main$fadeAmp, startTime, elapsed));
 	});
-var _user$project$Main$translate = function (_p7) {
-	var _p8 = _p7;
-	return _elm_lang$svg$Svg_Attributes$transform(
-		_elm_lang$core$String$concat(
-			{
-				ctor: '::',
-				_0: 'translate(',
-				_1: {
-					ctor: '::',
-					_0: _elm_lang$core$Basics$toString(_p8._0),
-					_1: {
-						ctor: '::',
-						_0: ',',
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$core$Basics$toString(_p8._1),
-							_1: {
-								ctor: '::',
-								_0: ')',
-								_1: {ctor: '[]'}
-							}
-						}
-					}
-				}
-			}));
-};
-var _user$project$Main$mix = F3(
-	function (percent, _p10, _p9) {
-		var _p11 = _p10;
-		var _p12 = _p9;
-		var m = F2(
-			function (u, v) {
-				return ((1 - percent) * _elm_lang$core$Basics$toFloat(u)) + (percent * _elm_lang$core$Basics$toFloat(v));
-			});
-		return {
-			ctor: '_Tuple2',
-			_0: A2(m, _p11._0, _p12._0),
-			_1: A2(m, _p11._1, _p12._1)
-		};
-	});
-var _user$project$Main$dims = {width: 120, height: 151, outerMargin: 5, innerMargin: 5};
 var _user$project$Main$viewBox = function (landscape) {
 	var halfRadius = landscape ? {x: (_user$project$Main$dims.outerMargin + _user$project$Main$dims.innerMargin) + _user$project$Main$dims.width, y: _user$project$Main$dims.outerMargin + ((_user$project$Main$dims.height / 2) | 0)} : {x: _user$project$Main$dims.outerMargin + ((_user$project$Main$dims.width / 2) | 0), y: (_user$project$Main$dims.outerMargin + _user$project$Main$dims.innerMargin) + _user$project$Main$dims.height};
 	return _elm_lang$svg$Svg_Attributes$viewBox(
@@ -11520,148 +11747,6 @@ var _user$project$Main$viewBox = function (landscape) {
 					}
 				})));
 };
-var _user$project$Main$firstPosition = function (landscape) {
-	return landscape ? {ctor: '_Tuple2', _0: (0 - _user$project$Main$dims.width) - _user$project$Main$dims.innerMargin, _1: ((0 - _user$project$Main$dims.height) / 2) | 0} : {ctor: '_Tuple2', _0: ((0 - _user$project$Main$dims.width) / 2) | 0, _1: (0 - _user$project$Main$dims.height) - _user$project$Main$dims.innerMargin};
-};
-var _user$project$Main$secondPosition = function (landscape) {
-	return landscape ? {ctor: '_Tuple2', _0: _user$project$Main$dims.innerMargin, _1: ((0 - _user$project$Main$dims.height) / 2) | 0} : {ctor: '_Tuple2', _0: ((0 - _user$project$Main$dims.width) / 2) | 0, _1: _user$project$Main$dims.innerMargin};
-};
-var _user$project$Main$drawHexagram = F2(
-	function (landscape, lines) {
-		var _p13 = A3(
-			_elm_lang$core$List$foldr,
-			_user$project$Main$splitLine,
-			{
-				ctor: '_Tuple3',
-				_0: {ctor: '[]'},
-				_1: {ctor: '[]'},
-				_2: {ctor: '[]'}
-			},
-			lines);
-		var before = _p13._0;
-		var changes = _p13._1;
-		var after = _p13._2;
-		var beforeGraphic = A2(
-			_elm_lang$svg$Svg$g,
-			{
-				ctor: '::',
-				_0: _user$project$Main$translate(
-					_user$project$Main$firstPosition(landscape)),
-				_1: {ctor: '[]'}
-			},
-			{
-				ctor: '::',
-				_0: _user$project$Main$drawLines(before),
-				_1: {
-					ctor: '::',
-					_0: _user$project$Main$drawText(before),
-					_1: {ctor: '[]'}
-				}
-			});
-		var afterGraphic = A2(
-			_elm_lang$svg$Svg$g,
-			{
-				ctor: '::',
-				_0: _user$project$Main$translate(
-					_user$project$Main$secondPosition(landscape)),
-				_1: {ctor: '[]'}
-			},
-			{
-				ctor: '::',
-				_0: _user$project$Main$drawLines(after),
-				_1: {
-					ctor: '::',
-					_0: _user$project$Main$drawText(after),
-					_1: {ctor: '[]'}
-				}
-			});
-		return {
-			ctor: '::',
-			_0: beforeGraphic,
-			_1: {
-				ctor: '::',
-				_0: afterGraphic,
-				_1: {ctor: '[]'}
-			}
-		};
-	});
-var _user$project$Main$centerPosition = {ctor: '_Tuple2', _0: ((0 - _user$project$Main$dims.width) / 2) | 0, _1: ((0 - _user$project$Main$dims.height) / 2) | 0};
-var _user$project$Main$drawFadeIn = F2(
-	function (progress, lines) {
-		var percent = A2(
-			_elm_lang$core$Basics$min,
-			1,
-			_elm_community$easing_functions$Ease$inOutQuad(progress));
-		var graphic = A2(
-			_user$project$Main$drawLinesFadingIn,
-			percent,
-			A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, lines));
-		return {
-			ctor: '::',
-			_0: A2(
-				_elm_lang$svg$Svg$g,
-				{
-					ctor: '::',
-					_0: _user$project$Main$translate(_user$project$Main$centerPosition),
-					_1: {ctor: '[]'}
-				},
-				{
-					ctor: '::',
-					_0: graphic,
-					_1: {ctor: '[]'}
-				}),
-			_1: {ctor: '[]'}
-		};
-	});
-var _user$project$Main$drawSplit = F3(
-	function (landscape, progress, lines) {
-		var firstLines = A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, lines);
-		var percent = A2(
-			_elm_lang$core$Basics$min,
-			1,
-			_elm_community$easing_functions$Ease$inOutQuint(progress));
-		var towardsFirstPosition = A3(
-			_user$project$Main$mix,
-			percent,
-			_user$project$Main$centerPosition,
-			_user$project$Main$firstPosition(landscape));
-		var towardsSecondPosition = A3(
-			_user$project$Main$mix,
-			percent,
-			_user$project$Main$centerPosition,
-			_user$project$Main$secondPosition(landscape));
-		return {
-			ctor: '::',
-			_0: A2(
-				_elm_lang$svg$Svg$g,
-				{
-					ctor: '::',
-					_0: _user$project$Main$translate(towardsSecondPosition),
-					_1: {ctor: '[]'}
-				},
-				{
-					ctor: '::',
-					_0: _user$project$Main$drawLinesSplitting(firstLines),
-					_1: {ctor: '[]'}
-				}),
-			_1: {
-				ctor: '::',
-				_0: A2(
-					_elm_lang$svg$Svg$g,
-					{
-						ctor: '::',
-						_0: _user$project$Main$translate(towardsFirstPosition),
-						_1: {ctor: '[]'}
-					},
-					{
-						ctor: '::',
-						_0: _user$project$Main$drawLines(firstLines),
-						_1: {ctor: '[]'}
-					}),
-				_1: {ctor: '[]'}
-			}
-		};
-	});
 var _user$project$Main$frame = F2(
 	function (window, contents) {
 		var slightlyLessThan = function (x) {
@@ -11708,8 +11793,8 @@ var _user$project$Main$frame = F2(
 			});
 	});
 var _user$project$Main$toLine = function (i) {
-	var _p14 = i;
-	switch (_p14) {
+	var _p19 = i;
+	switch (_p19) {
 		case 1:
 			return {ctor: '_Tuple2', _0: false, _1: false};
 		case 2:
@@ -11730,10 +11815,10 @@ var _user$project$Main$toLine = function (i) {
 			return _elm_lang$core$Native_Utils.crashCase(
 				'Main',
 				{
-					start: {line: 147, column: 5},
-					end: {line: 173, column: 39}
+					start: {line: 151, column: 5},
+					end: {line: 177, column: 39}
 				},
-				_p14)('Out of range');
+				_p19)('Out of range');
 	}
 };
 var _user$project$Main$Model = F3(
@@ -11753,7 +11838,7 @@ var _user$project$Main$Tick = function (a) {
 var _user$project$Main$WindowSize = function (a) {
 	return {ctor: 'WindowSize', _0: a};
 };
-var _user$project$Main$subscriptions = function (_p16) {
+var _user$project$Main$subscriptions = function (_p21) {
 	return _elm_lang$core$Platform_Sub$batch(
 		{
 			ctor: '::',
@@ -11814,27 +11899,32 @@ var _user$project$Main$view = function (model) {
 		_user$project$Main$frame,
 		model.window,
 		function () {
-			var _p17 = model.phase;
-			switch (_p17.ctor) {
+			var _p22 = model.phase;
+			switch (_p22.ctor) {
 				case 'JustAButton':
-					return _user$project$Main$stableWobbler(_p17._0);
+					return _user$project$Main$stableWobbler(_p22._0);
 				case 'ButtonFadeOut':
-					return A2(_user$project$Main$fadingWobbler, _p17._0.startTime, _p17._0.elapsed);
+					return A2(_user$project$Main$fadingWobbler, _p22._0.startTime, _p22._0.elapsed);
 				case 'NeedHexagram':
 					return {ctor: '[]'};
 				case 'WaitingForHexagram':
 					return {ctor: '[]'};
 				case 'HexagramFadeIn':
-					return A2(_user$project$Main$drawFadeIn, _p17._0.progress, _p17._0.hex);
+					return A2(_user$project$Main$drawFadeIn, _p22._0.progress, _p22._0.hex);
 				case 'HexagramSplit':
-					return A3(_user$project$Main$drawSplit, landscape, _p17._0.progress, _p17._0.hex);
+					return A3(_user$project$Main$drawSplit, landscape, _p22._0.progress, _p22._0.hex);
+				case 'HexagramMorph':
+					return A3(_user$project$Main$drawMorph, landscape, _p22._0.progress, _p22._0.hex);
 				default:
-					return A2(_user$project$Main$drawHexagram, landscape, _p17._0);
+					return A2(_user$project$Main$drawHexagram, landscape, _p22._0);
 			}
 		}());
 };
 var _user$project$Main$Hexagram = function (a) {
 	return {ctor: 'Hexagram', _0: a};
+};
+var _user$project$Main$HexagramMorph = function (a) {
+	return {ctor: 'HexagramMorph', _0: a};
 };
 var _user$project$Main$HexagramSplit = function (a) {
 	return {ctor: 'HexagramSplit', _0: a};
@@ -11883,48 +11973,57 @@ var _user$project$Main$init = function () {
 }();
 var _user$project$Main$animationUpdate = F2(
 	function (dt, phase) {
-		var _p18 = phase;
-		switch (_p18.ctor) {
+		var _p23 = phase;
+		switch (_p23.ctor) {
 			case 'JustAButton':
-				return _user$project$Main$JustAButton(_p18._0 + dt);
+				return _user$project$Main$JustAButton(_p23._0 + dt);
 			case 'ButtonFadeOut':
-				var _p19 = _p18._0;
-				return (_elm_lang$core$Native_Utils.cmp(_p19.elapsed, 2 * _elm_lang$core$Time$second) > 0) ? _user$project$Main$NeedHexagram : _user$project$Main$ButtonFadeOut(
+				var _p24 = _p23._0;
+				return (_elm_lang$core$Native_Utils.cmp(_p24.elapsed, 2 * _elm_lang$core$Time$second) > 0) ? _user$project$Main$NeedHexagram : _user$project$Main$ButtonFadeOut(
 					_elm_lang$core$Native_Utils.update(
-						_p19,
-						{elapsed: _p19.elapsed + dt}));
+						_p24,
+						{elapsed: _p24.elapsed + dt}));
 			case 'NeedHexagram':
 				return _user$project$Main$NeedHexagram;
 			case 'WaitingForHexagram':
 				return _user$project$Main$WaitingForHexagram;
 			case 'HexagramFadeIn':
-				var _p20 = _p18._0;
-				return (_elm_lang$core$Native_Utils.cmp(_p20.progress, 1) > 0) ? _user$project$Main$HexagramSplit(
+				var _p25 = _p23._0;
+				return (_elm_lang$core$Native_Utils.cmp(_p25.progress, 1) > 0) ? _user$project$Main$HexagramSplit(
 					_elm_lang$core$Native_Utils.update(
-						_p20,
+						_p25,
 						{progress: 0})) : _user$project$Main$HexagramFadeIn(
 					_elm_lang$core$Native_Utils.update(
-						_p20,
-						{progress: _p20.progress + 3.0e-2}));
+						_p25,
+						{progress: _p25.progress + 3.0e-2}));
 			case 'HexagramSplit':
-				var _p21 = _p18._0;
-				return (_elm_lang$core$Native_Utils.cmp(_p21.progress, 1) > 0) ? _user$project$Main$Hexagram(_p21.hex) : _user$project$Main$HexagramSplit(
+				var _p26 = _p23._0;
+				return (_elm_lang$core$Native_Utils.cmp(_p26.progress, 1) > 0) ? _user$project$Main$HexagramMorph(
 					_elm_lang$core$Native_Utils.update(
-						_p21,
-						{progress: _p21.progress + 3.0e-2}));
+						_p26,
+						{progress: 0})) : _user$project$Main$HexagramSplit(
+					_elm_lang$core$Native_Utils.update(
+						_p26,
+						{progress: _p26.progress + 3.0e-2}));
+			case 'HexagramMorph':
+				var _p27 = _p23._0;
+				return (_elm_lang$core$Native_Utils.cmp(_p27.progress, 1) > 0) ? _user$project$Main$Hexagram(_p27.hex) : _user$project$Main$HexagramMorph(
+					_elm_lang$core$Native_Utils.update(
+						_p27,
+						{progress: _p27.progress + 6.0e-2}));
 			default:
 				return phase;
 		}
 	});
 var _user$project$Main$timeUpdate = F2(
 	function (dt, model) {
-		var _p22 = model.phase;
-		if (_p22.ctor === 'NeedHexagram') {
+		var _p28 = model.phase;
+		if (_p28.ctor === 'NeedHexagram') {
 			return _user$project$Main$requestHexagram(model);
 		} else {
-			var _p23 = A4(_nphollon$update_clock$Clock$update, _user$project$Main$animationUpdate, dt, model.clock, model.phase);
-			var clock = _p23._0;
-			var phase = _p23._1;
+			var _p29 = A4(_nphollon$update_clock$Clock$update, _user$project$Main$animationUpdate, dt, model.clock, model.phase);
+			var clock = _p29._0;
+			var phase = _p29._1;
 			return A2(
 				_elm_lang$core$Platform_Cmd_ops['!'],
 				_elm_lang$core$Native_Utils.update(
@@ -11935,8 +12034,8 @@ var _user$project$Main$timeUpdate = F2(
 	});
 var _user$project$Main$update = F2(
 	function (action, model) {
-		var _p24 = action;
-		switch (_p24.ctor) {
+		var _p30 = action;
+		switch (_p30.ctor) {
 			case 'Consult':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
@@ -11944,7 +12043,7 @@ var _user$project$Main$update = F2(
 						model,
 						{
 							phase: _user$project$Main$ButtonFadeOut(
-								{elapsed: 0, startTime: _p24._0})
+								{elapsed: 0, startTime: _p30._0})
 						}),
 					{ctor: '[]'});
 			case 'WindowSize':
@@ -11952,7 +12051,7 @@ var _user$project$Main$update = F2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					_elm_lang$core$Native_Utils.update(
 						model,
-						{window: _p24._0}),
+						{window: _p30._0}),
 					{ctor: '[]'});
 			case 'NewHex':
 				return A2(
@@ -11961,11 +12060,11 @@ var _user$project$Main$update = F2(
 						model,
 						{
 							phase: _user$project$Main$HexagramFadeIn(
-								{progress: 0, hex: _p24._0})
+								{progress: 0, hex: _p30._0})
 						}),
 					{ctor: '[]'});
 			default:
-				return A2(_user$project$Main$timeUpdate, _p24._0, model);
+				return A2(_user$project$Main$timeUpdate, _p30._0, model);
 		}
 	});
 var _user$project$Main$main = _elm_lang$html$Html$program(
