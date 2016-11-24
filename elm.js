@@ -11367,135 +11367,6 @@ var _user$project$Main$splitLine = F2(
 			_2: {ctor: '::', _0: _p5, _1: _p4._2}
 		};
 	});
-var _user$project$Main$drawHexagram = F2(
-	function (window, lines) {
-		var landscape = _elm_lang$core$Native_Utils.cmp(window.height, window.width) < 0;
-		var positionAttrs = landscape ? {
-			ctor: '::',
-			_0: _elm_lang$svg$Svg_Attributes$height(
-				_elm_lang$core$Basics$toString(((window.height * 9) / 10) | 0)),
-			_1: {
-				ctor: '::',
-				_0: _elm_lang$svg$Svg_Attributes$width(
-					_elm_lang$core$Basics$toString(((window.width * 4) / 10) | 0)),
-				_1: {
-					ctor: '::',
-					_0: _elm_lang$svg$Svg_Attributes$viewBox('0 0 120 150'),
-					_1: {ctor: '[]'}
-				}
-			}
-		} : {
-			ctor: '::',
-			_0: _elm_lang$svg$Svg_Attributes$width(
-				_elm_lang$core$Basics$toString(((window.width * 9) / 10) | 0)),
-			_1: {
-				ctor: '::',
-				_0: _elm_lang$svg$Svg_Attributes$height(
-					_elm_lang$core$Basics$toString(((window.height * 5) / 11) | 0)),
-				_1: {
-					ctor: '::',
-					_0: _elm_lang$svg$Svg_Attributes$viewBox('0 0 120 150'),
-					_1: {ctor: '[]'}
-				}
-			}
-		};
-		var flex = landscape ? {
-			ctor: '::',
-			_0: {ctor: '_Tuple2', _0: 'display', _1: 'flex'},
-			_1: {
-				ctor: '::',
-				_0: {ctor: '_Tuple2', _0: 'justify-content', _1: 'space-around'},
-				_1: {ctor: '[]'}
-			}
-		} : {
-			ctor: '::',
-			_0: {ctor: '_Tuple2', _0: 'display', _1: 'flex'},
-			_1: {
-				ctor: '::',
-				_0: {ctor: '_Tuple2', _0: 'flex-direction', _1: 'column'},
-				_1: {
-					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: 'justify-content', _1: 'space-around'},
-					_1: {
-						ctor: '::',
-						_0: {ctor: '_Tuple2', _0: 'align-items', _1: 'center'},
-						_1: {ctor: '[]'}
-					}
-				}
-			}
-		};
-		var _p7 = A3(
-			_elm_lang$core$List$foldr,
-			_user$project$Main$splitLine,
-			{
-				ctor: '_Tuple3',
-				_0: {ctor: '[]'},
-				_1: {ctor: '[]'},
-				_2: {ctor: '[]'}
-			},
-			lines);
-		var before = _p7._0;
-		var changes = _p7._1;
-		var after = _p7._2;
-		var beforeGraphic = A2(
-			_elm_lang$svg$Svg$svg,
-			positionAttrs,
-			{
-				ctor: '::',
-				_0: A2(_user$project$Main$drawHalfHexagram, 1, before),
-				_1: {
-					ctor: '::',
-					_0: _user$project$Main$drawText(before),
-					_1: {ctor: '[]'}
-				}
-			});
-		var afterGraphic = A2(
-			_elm_lang$svg$Svg$svg,
-			positionAttrs,
-			{
-				ctor: '::',
-				_0: A2(_user$project$Main$drawHalfHexagram, 1, after),
-				_1: {
-					ctor: '::',
-					_0: _user$project$Main$drawText(after),
-					_1: {ctor: '[]'}
-				}
-			});
-		return A2(
-			_elm_lang$html$Html$div,
-			{
-				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$style(flex),
-				_1: {ctor: '[]'}
-			},
-			{
-				ctor: '::',
-				_0: beforeGraphic,
-				_1: {
-					ctor: '::',
-					_0: afterGraphic,
-					_1: {ctor: '[]'}
-				}
-			});
-	});
-var _user$project$Main$drawFadeIn = F2(
-	function (progress, lines) {
-		var percent = A2(
-			_elm_lang$core$Basics$min,
-			1,
-			_elm_community$easing_functions$Ease$inOutQuad(progress));
-		return A3(
-			_elm_lang$core$Basics$flip,
-			F2(
-				function (x, y) {
-					return {ctor: '::', _0: x, _1: y};
-				}),
-			{ctor: '[]'},
-			A2(
-				_user$project$Main$drawHalfHexagram,
-				percent,
-				A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, lines)));
-	});
 var _user$project$Main$wobbler = function (amplitudes) {
 	var color = function (i) {
 		return _elm_lang$core$Native_Utils.eq(
@@ -11508,10 +11379,10 @@ var _user$project$Main$wobbler = function (amplitudes) {
 				_elm_lang$svg$Svg$circle,
 				{
 					ctor: '::',
-					_0: _elm_lang$svg$Svg_Attributes$cx('60'),
+					_0: _elm_lang$svg$Svg_Attributes$cx('0'),
 					_1: {
 						ctor: '::',
-						_0: _elm_lang$svg$Svg_Attributes$cy('60'),
+						_0: _elm_lang$svg$Svg_Attributes$cy('0'),
 						_1: {
 							ctor: '::',
 							_0: _elm_lang$svg$Svg_Attributes$fill(
@@ -11563,8 +11434,157 @@ var _user$project$Main$fadingWobbler = F2(
 		return _user$project$Main$wobbler(
 			A2(_user$project$Main$fadeAmp, startTime, elapsed));
 	});
+var _user$project$Main$translate = F2(
+	function (x, y) {
+		return _elm_lang$svg$Svg_Attributes$transform(
+			_elm_lang$core$String$concat(
+				{
+					ctor: '::',
+					_0: 'translate(',
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$core$Basics$toString(x),
+						_1: {
+							ctor: '::',
+							_0: ',',
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$core$Basics$toString(y),
+								_1: {
+									ctor: '::',
+									_0: ')',
+									_1: {ctor: '[]'}
+								}
+							}
+						}
+					}
+				}));
+	});
+var _user$project$Main$dims = {width: 120, height: 151, outerMargin: 5, innerMargin: 5};
+var _user$project$Main$viewBox = function (landscape) {
+	var halfRadius = landscape ? {x: (_user$project$Main$dims.outerMargin + _user$project$Main$dims.innerMargin) + _user$project$Main$dims.width, y: _user$project$Main$dims.outerMargin + ((_user$project$Main$dims.height / 2) | 0)} : {x: _user$project$Main$dims.outerMargin + ((_user$project$Main$dims.width / 2) | 0), y: (_user$project$Main$dims.outerMargin + _user$project$Main$dims.innerMargin) + _user$project$Main$dims.height};
+	return _elm_lang$svg$Svg_Attributes$viewBox(
+		A2(
+			_elm_lang$core$String$join,
+			' ',
+			A2(
+				_elm_lang$core$List$map,
+				_elm_lang$core$Basics$toString,
+				{
+					ctor: '::',
+					_0: 0 - halfRadius.x,
+					_1: {
+						ctor: '::',
+						_0: 0 - halfRadius.y,
+						_1: {
+							ctor: '::',
+							_0: 2 * halfRadius.x,
+							_1: {
+								ctor: '::',
+								_0: 2 * halfRadius.y,
+								_1: {ctor: '[]'}
+							}
+						}
+					}
+				})));
+};
+var _user$project$Main$firstPosition = function (landscape) {
+	return landscape ? A2(_user$project$Main$translate, (0 - _user$project$Main$dims.width) - _user$project$Main$dims.innerMargin, ((0 - _user$project$Main$dims.height) / 2) | 0) : A2(_user$project$Main$translate, ((0 - _user$project$Main$dims.width) / 2) | 0, (0 - _user$project$Main$dims.height) - _user$project$Main$dims.innerMargin);
+};
+var _user$project$Main$secondPosition = function (landscape) {
+	return landscape ? A2(_user$project$Main$translate, _user$project$Main$dims.innerMargin, ((0 - _user$project$Main$dims.height) / 2) | 0) : A2(_user$project$Main$translate, ((0 - _user$project$Main$dims.width) / 2) | 0, _user$project$Main$dims.innerMargin);
+};
+var _user$project$Main$drawHexagram = F2(
+	function (window, lines) {
+		var landscape = _elm_lang$core$Native_Utils.cmp(window.height, window.width) < 0;
+		var _p7 = A3(
+			_elm_lang$core$List$foldr,
+			_user$project$Main$splitLine,
+			{
+				ctor: '_Tuple3',
+				_0: {ctor: '[]'},
+				_1: {ctor: '[]'},
+				_2: {ctor: '[]'}
+			},
+			lines);
+		var before = _p7._0;
+		var changes = _p7._1;
+		var after = _p7._2;
+		var beforeGraphic = A2(
+			_elm_lang$svg$Svg$g,
+			{
+				ctor: '::',
+				_0: _user$project$Main$firstPosition(landscape),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: A2(_user$project$Main$drawHalfHexagram, 1, before),
+				_1: {
+					ctor: '::',
+					_0: _user$project$Main$drawText(before),
+					_1: {ctor: '[]'}
+				}
+			});
+		var afterGraphic = A2(
+			_elm_lang$svg$Svg$g,
+			{
+				ctor: '::',
+				_0: _user$project$Main$secondPosition(landscape),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: A2(_user$project$Main$drawHalfHexagram, 1, after),
+				_1: {
+					ctor: '::',
+					_0: _user$project$Main$drawText(after),
+					_1: {ctor: '[]'}
+				}
+			});
+		return {
+			ctor: '::',
+			_0: beforeGraphic,
+			_1: {
+				ctor: '::',
+				_0: afterGraphic,
+				_1: {ctor: '[]'}
+			}
+		};
+	});
+var _user$project$Main$centerPosition = A2(_user$project$Main$translate, ((0 - _user$project$Main$dims.width) / 2) | 0, ((0 - _user$project$Main$dims.height) / 2) | 0);
+var _user$project$Main$drawFadeIn = F2(
+	function (progress, lines) {
+		var percent = A2(
+			_elm_lang$core$Basics$min,
+			1,
+			_elm_community$easing_functions$Ease$inOutQuad(progress));
+		var graphic = A2(
+			_user$project$Main$drawHalfHexagram,
+			percent,
+			A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, lines));
+		return {
+			ctor: '::',
+			_0: A2(
+				_elm_lang$svg$Svg$g,
+				{
+					ctor: '::',
+					_0: _user$project$Main$centerPosition,
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: graphic,
+					_1: {ctor: '[]'}
+				}),
+			_1: {ctor: '[]'}
+		};
+	});
 var _user$project$Main$frame = F2(
 	function (window, contents) {
+		var slightlyLessThan = function (x) {
+			return _elm_lang$core$Basics$toString(((x * 24) / 25) | 0);
+		};
 		return A2(
 			_elm_lang$html$Html$div,
 			{
@@ -11588,14 +11608,15 @@ var _user$project$Main$frame = F2(
 					{
 						ctor: '::',
 						_0: _elm_lang$svg$Svg_Attributes$width(
-							_elm_lang$core$Basics$toString(((window.width * 9) / 10) | 0)),
+							slightlyLessThan(window.width)),
 						_1: {
 							ctor: '::',
 							_0: _elm_lang$svg$Svg_Attributes$height(
-								_elm_lang$core$Basics$toString(((window.height * 9) / 10) | 0)),
+								slightlyLessThan(window.height)),
 							_1: {
 								ctor: '::',
-								_0: _elm_lang$svg$Svg_Attributes$viewBox('0 0 120 120'),
+								_0: _user$project$Main$viewBox(
+									_elm_lang$core$Native_Utils.cmp(window.height, window.width) < 0),
 								_1: {ctor: '[]'}
 							}
 						}
@@ -11637,6 +11658,10 @@ var _user$project$Main$Model = F3(
 	function (a, b, c) {
 		return {clock: a, window: b, phase: c};
 	});
+var _user$project$Main$Dimensions = F4(
+	function (a, b, c, d) {
+		return {width: a, height: b, outerMargin: c, innerMargin: d};
+	});
 var _user$project$Main$NewHex = function (a) {
 	return {ctor: 'NewHex', _0: a};
 };
@@ -11666,10 +11691,10 @@ var _user$project$Main$stableWobbler = function (time) {
 		_elm_lang$svg$Svg$circle,
 		{
 			ctor: '::',
-			_0: _elm_lang$svg$Svg_Attributes$cx('60'),
+			_0: _elm_lang$svg$Svg_Attributes$cx('0'),
 			_1: {
 				ctor: '::',
-				_0: _elm_lang$svg$Svg_Attributes$cy('60'),
+				_0: _elm_lang$svg$Svg_Attributes$cy('0'),
 				_1: {
 					ctor: '::',
 					_0: _elm_lang$svg$Svg_Attributes$r('30'),
@@ -11702,30 +11727,26 @@ var _user$project$Main$stableWobbler = function (time) {
 		});
 };
 var _user$project$Main$view = function (model) {
-	var _p11 = model.phase;
-	switch (_p11.ctor) {
-		case 'JustAButton':
-			return A2(
-				_user$project$Main$frame,
-				model.window,
-				_user$project$Main$stableWobbler(_p11._0));
-		case 'ButtonFadeOut':
-			return A2(
-				_user$project$Main$frame,
-				model.window,
-				A2(_user$project$Main$fadingWobbler, _p11._0.startTime, _p11._0.elapsed));
-		case 'NeedHexagram':
-			return _elm_lang$html$Html$text('');
-		case 'WaitingForHexagram':
-			return _elm_lang$html$Html$text('');
-		case 'HexagramFadeIn':
-			return A2(
-				_user$project$Main$frame,
-				model.window,
-				A2(_user$project$Main$drawFadeIn, _p11._0.progress, _p11._0.hex));
-		default:
-			return A2(_user$project$Main$drawHexagram, model.window, _p11._0);
-	}
+	return A2(
+		_user$project$Main$frame,
+		model.window,
+		function () {
+			var _p11 = model.phase;
+			switch (_p11.ctor) {
+				case 'JustAButton':
+					return _user$project$Main$stableWobbler(_p11._0);
+				case 'ButtonFadeOut':
+					return A2(_user$project$Main$fadingWobbler, _p11._0.startTime, _p11._0.elapsed);
+				case 'NeedHexagram':
+					return {ctor: '[]'};
+				case 'WaitingForHexagram':
+					return {ctor: '[]'};
+				case 'HexagramFadeIn':
+					return A2(_user$project$Main$drawFadeIn, _p11._0.progress, _p11._0.hex);
+				default:
+					return A2(_user$project$Main$drawHexagram, model.window, _p11._0);
+			}
+		}());
 };
 var _user$project$Main$Hexagram = function (a) {
 	return {ctor: 'Hexagram', _0: a};

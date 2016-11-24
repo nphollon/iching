@@ -199,41 +199,114 @@ animationUpdate dt phase =
 
 view : Model -> Html Action
 view model =
-    case model.phase of
-        JustAButton time ->
-            frame model.window (stableWobbler time)
+    frame model.window <|
+        case model.phase of
+            JustAButton time ->
+                stableWobbler time
 
-        ButtonFadeOut { startTime, elapsed } ->
-            frame model.window (fadingWobbler startTime elapsed)
+            ButtonFadeOut { startTime, elapsed } ->
+                fadingWobbler startTime elapsed
 
-        NeedHexagram ->
-            Html.text ""
+            NeedHexagram ->
+                []
 
-        WaitingForHexagram ->
-            Html.text ""
+            WaitingForHexagram ->
+                []
 
-        HexagramFadeIn { progress, hex } ->
-            frame model.window (drawFadeIn progress hex)
+            HexagramFadeIn { progress, hex } ->
+                drawFadeIn progress hex
 
-        Hexagram hexagram ->
-            drawHexagram model.window hexagram
+            Hexagram hexagram ->
+                drawHexagram model.window hexagram
 
 
 frame : Window.Size -> List (Svg a) -> Html a
 frame window contents =
-    Html.div
-        [ style
-            [ ( "display", "flex" )
-            , ( "justify-content", "center" )
+    let
+        slightlyLessThan x =
+            toString (x * 24 // 25)
+    in
+        Html.div
+            [ style
+                [ ( "display", "flex" )
+                , ( "justify-content", "center" )
+                ]
             ]
-        ]
-        [ Svg.svg
-            [ Attr.width <| toString <| window.width * 9 // 10
-            , Attr.height <| toString <| window.height * 9 // 10
-            , Attr.viewBox "0 0 120 120"
+            [ Svg.svg
+                [ Attr.width <| slightlyLessThan window.width
+                , Attr.height <| slightlyLessThan window.height
+                , viewBox (window.height < window.width)
+                ]
+                contents
             ]
-            contents
+
+
+type alias Dimensions =
+    { width : Int
+    , height : Int
+    , outerMargin : Int
+    , innerMargin : Int
+    }
+
+
+dims : Dimensions
+dims =
+    { width = 120
+    , height = 151
+    , outerMargin = 5
+    , innerMargin = 5
+    }
+
+
+viewBox : Bool -> Attribute a
+viewBox landscape =
+    let
+        halfRadius =
+            if landscape then
+                { x = dims.outerMargin + dims.innerMargin + dims.width
+                , y = dims.outerMargin + dims.height // 2
+                }
+            else
+                { x = dims.outerMargin + dims.width // 2
+                , y = dims.outerMargin + dims.innerMargin + dims.height
+                }
+    in
+        [ -halfRadius.x
+        , -halfRadius.y
+        , 2 * halfRadius.x
+        , 2 * halfRadius.y
         ]
+            |> List.map toString
+            |> String.join " "
+            |> Attr.viewBox
+
+
+firstPosition : Bool -> Attribute a
+firstPosition landscape =
+    if landscape then
+        translate (-dims.width - dims.innerMargin) (-dims.height // 2)
+    else
+        translate (-dims.width // 2) (-dims.height - dims.innerMargin)
+
+
+secondPosition : Bool -> Attribute a
+secondPosition landscape =
+    if landscape then
+        translate dims.innerMargin (-dims.height // 2)
+    else
+        translate (-dims.width // 2) dims.innerMargin
+
+
+centerPosition : Attribute a
+centerPosition =
+    translate (-dims.width // 2) (-dims.height // 2)
+
+
+translate : Int -> Int -> Attribute a
+translate x y =
+    [ "translate(", toString x, ",", toString y, ")" ]
+        |> String.concat
+        |> Attr.transform
 
 
 stableWobbler : Time -> List (Svg Action)
@@ -241,8 +314,8 @@ stableWobbler time =
     let
         consultButton =
             Svg.circle
-                [ Attr.cx "60"
-                , Attr.cy "60"
+                [ Attr.cx "0"
+                , Attr.cy "0"
                 , Attr.r "30"
                 , Attr.fill "none"
                 , Attr.pointerEvents "visible"
@@ -312,8 +385,8 @@ wobbler amplitudes =
 
         drawCircle i radius =
             Svg.circle
-                [ Attr.cx "60"
-                , Attr.cy "60"
+                [ Attr.cx "0"
+                , Attr.cy "0"
                 , Attr.fill (color i)
                 , Attr.r (toString radius)
                 ]
@@ -327,13 +400,15 @@ drawFadeIn progress lines =
     let
         percent =
             min 1 (Ease.inOutQuad progress)
+
+        graphic =
+            List.map Tuple.first lines
+                |> drawHalfHexagram percent
     in
-        List.map Tuple.first lines
-            |> drawHalfHexagram percent
-            |> flip (::) []
+        [ Svg.g [ centerPosition ] [ graphic ] ]
 
 
-drawHexagram : Window.Size -> List Line -> Html a
+drawHexagram : Window.Size -> List Line -> List (Svg a)
 drawHexagram window lines =
     let
         ( before, changes, after ) =
@@ -342,46 +417,23 @@ drawHexagram window lines =
         landscape =
             window.height < window.width
 
-        positionAttrs =
-            if landscape then
-                [ Attr.height <| toString <| window.height * 9 // 10
-                , Attr.width <| toString <| window.width * 4 // 10
-                , Attr.viewBox "0 0 120 150"
-                ]
-            else
-                [ Attr.width <| toString <| window.width * 9 // 10
-                , Attr.height <| toString <| window.height * 5 // 11
-                , Attr.viewBox "0 0 120 150"
-                ]
-
         beforeGraphic =
-            Svg.svg positionAttrs
+            Svg.g
+                [ firstPosition landscape ]
                 [ drawHalfHexagram 1 before
                 , drawText before
                 ]
 
         afterGraphic =
-            Svg.svg positionAttrs
+            Svg.g
+                [ secondPosition landscape ]
                 [ drawHalfHexagram 1 after
                 , drawText after
                 ]
-
-        flex =
-            if landscape then
-                [ ( "display", "flex" )
-                , ( "justify-content", "space-around" )
-                ]
-            else
-                [ ( "display", "flex" )
-                , ( "flex-direction", "column" )
-                , ( "justify-content", "space-around" )
-                , ( "align-items", "center" )
-                ]
     in
-        Html.div [ style flex ]
-            [ beforeGraphic
-            , afterGraphic
-            ]
+        [ beforeGraphic
+        , afterGraphic
+        ]
 
 
 type alias Triple a =
@@ -399,7 +451,8 @@ splitLine ( before, after ) ( befores, changes, afters ) =
 drawHalfHexagram : Float -> List Bool -> Svg a
 drawHalfHexagram percent halfLines =
     List.indexedMap (drawHalfLine percent) halfLines
-        |> Svg.g [ Attr.fill "white" ]
+        |> Svg.g
+            [ Attr.fill "white" ]
 
 
 drawHalfLine : Float -> Int -> Bool -> Svg a
