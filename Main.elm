@@ -43,6 +43,10 @@ type Phase
         { progress : Float
         , hex : List Line
         }
+    | HexagramSplit
+        { progress : Float
+        , hex : List Line
+        }
     | Hexagram (List Line)
 
 
@@ -189,9 +193,15 @@ animationUpdate dt phase =
 
         HexagramFadeIn m ->
             if m.progress > 1 then
-                Hexagram m.hex
+                HexagramSplit { m | progress = 0 }
             else
                 HexagramFadeIn { m | progress = m.progress + 0.03 }
+
+        HexagramSplit m ->
+            if m.progress > 1 then
+                Hexagram m.hex
+            else
+                HexagramSplit { m | progress = m.progress + 0.03 }
 
         Hexagram _ ->
             phase
@@ -199,25 +209,32 @@ animationUpdate dt phase =
 
 view : Model -> Html Action
 view model =
-    frame model.window <|
-        case model.phase of
-            JustAButton time ->
-                stableWobbler time
+    let
+        landscape =
+            model.window.height < model.window.width
+    in
+        frame model.window <|
+            case model.phase of
+                JustAButton time ->
+                    stableWobbler time
 
-            ButtonFadeOut { startTime, elapsed } ->
-                fadingWobbler startTime elapsed
+                ButtonFadeOut { startTime, elapsed } ->
+                    fadingWobbler startTime elapsed
 
-            NeedHexagram ->
-                []
+                NeedHexagram ->
+                    []
 
-            WaitingForHexagram ->
-                []
+                WaitingForHexagram ->
+                    []
 
-            HexagramFadeIn { progress, hex } ->
-                drawFadeIn progress hex
+                HexagramFadeIn { progress, hex } ->
+                    drawFadeIn progress hex
 
-            Hexagram hexagram ->
-                drawHexagram model.window hexagram
+                HexagramSplit { progress, hex } ->
+                    drawSplit landscape progress hex
+
+                Hexagram hexagram ->
+                    drawHexagram landscape hexagram
 
 
 frame : Window.Size -> List (Svg a) -> Html a
@@ -281,29 +298,38 @@ viewBox landscape =
             |> Attr.viewBox
 
 
-firstPosition : Bool -> Attribute a
+firstPosition : Bool -> ( Int, Int )
 firstPosition landscape =
     if landscape then
-        translate (-dims.width - dims.innerMargin) (-dims.height // 2)
+        ( -dims.width - dims.innerMargin, -dims.height // 2 )
     else
-        translate (-dims.width // 2) (-dims.height - dims.innerMargin)
+        ( -dims.width // 2, -dims.height - dims.innerMargin )
 
 
-secondPosition : Bool -> Attribute a
+secondPosition : Bool -> ( Int, Int )
 secondPosition landscape =
     if landscape then
-        translate dims.innerMargin (-dims.height // 2)
+        ( dims.innerMargin, -dims.height // 2 )
     else
-        translate (-dims.width // 2) dims.innerMargin
+        ( -dims.width // 2, dims.innerMargin )
 
 
-centerPosition : Attribute a
+centerPosition : ( Int, Int )
 centerPosition =
-    translate (-dims.width // 2) (-dims.height // 2)
+    ( -dims.width // 2, -dims.height // 2 )
 
 
-translate : Int -> Int -> Attribute a
-translate x y =
+mix : Float -> ( Int, Int ) -> ( Int, Int ) -> ( Float, Float )
+mix percent ( x1, y1 ) ( x2, y2 ) =
+    let
+        m u v =
+            (1 - percent) * toFloat u + percent * toFloat v
+    in
+        ( m x1 x2, m y1 y2 )
+
+
+translate : ( number, number_ ) -> Attribute a
+translate ( x, y ) =
     [ "translate(", toString x, ",", toString y, ")" ]
         |> String.concat
         |> Attr.transform
@@ -403,31 +429,50 @@ drawFadeIn progress lines =
 
         graphic =
             List.map Tuple.first lines
-                |> drawHalfHexagram percent
+                |> drawLinesFadingIn percent
     in
-        [ Svg.g [ centerPosition ] [ graphic ] ]
+        [ Svg.g [ translate centerPosition ] [ graphic ] ]
 
 
-drawHexagram : Window.Size -> List Line -> List (Svg a)
-drawHexagram window lines =
+drawSplit : Bool -> Float -> List Line -> List (Svg a)
+drawSplit landscape progress lines =
+    let
+        percent =
+            min 1 (Ease.inOutQuint progress)
+
+        firstLines =
+            List.map Tuple.first lines
+
+        towardsFirstPosition =
+            mix percent centerPosition (firstPosition landscape)
+
+        towardsSecondPosition =
+            mix percent centerPosition (secondPosition landscape)
+    in
+        [ Svg.g [ translate towardsSecondPosition ]
+            [ drawLinesSplitting firstLines ]
+        , Svg.g [ translate towardsFirstPosition ]
+            [ drawLines firstLines ]
+        ]
+
+
+drawHexagram : Bool -> List Line -> List (Svg a)
+drawHexagram landscape lines =
     let
         ( before, changes, after ) =
             List.foldr splitLine ( [], [], [] ) lines
 
-        landscape =
-            window.height < window.width
-
         beforeGraphic =
             Svg.g
-                [ firstPosition landscape ]
-                [ drawHalfHexagram 1 before
+                [ translate (firstPosition landscape) ]
+                [ drawLines before
                 , drawText before
                 ]
 
         afterGraphic =
             Svg.g
-                [ secondPosition landscape ]
-                [ drawHalfHexagram 1 after
+                [ translate (secondPosition landscape) ]
+                [ drawLines after
                 , drawText after
                 ]
     in
@@ -448,15 +493,26 @@ splitLine ( before, after ) ( befores, changes, afters ) =
     )
 
 
-drawHalfHexagram : Float -> List Bool -> Svg a
-drawHalfHexagram percent halfLines =
-    List.indexedMap (drawHalfLine percent) halfLines
-        |> Svg.g
-            [ Attr.fill "white" ]
+drawLinesFadingIn : Float -> List Bool -> Svg a
+drawLinesFadingIn percent halfLines =
+    Svg.g []
+        (List.indexedMap (drawHalfLine "white" percent) halfLines)
 
 
-drawHalfLine : Float -> Int -> Bool -> Svg a
-drawHalfLine percent index isYang =
+drawLinesSplitting : List Bool -> Svg a
+drawLinesSplitting halfLines =
+    Svg.g []
+        (List.indexedMap (drawHalfLine "blue" 1) halfLines)
+
+
+drawLines : List Bool -> Svg a
+drawLines halfLines =
+    Svg.g []
+        (List.indexedMap (drawHalfLine "white" 1) halfLines)
+
+
+drawHalfLine : String -> Float -> Int -> Bool -> Svg a
+drawHalfLine color percent index isYang =
     let
         fullHeight =
             9
@@ -476,6 +532,7 @@ drawHalfLine percent index isYang =
                 , Attr.height <| toString height
                 , Attr.x <| toString x
                 , Attr.width <| toString width
+                , Attr.fill color
                 ]
                 []
     in
