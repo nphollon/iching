@@ -1,9 +1,8 @@
 module Main exposing (main)
 
 import Array.Hamt as Array exposing (Array)
-import Color
+import Color exposing (Color)
 import Color.Manipulate
-import Color.Convert
 import Dict exposing (Dict)
 import Random
 import String
@@ -13,7 +12,8 @@ import Html exposing (..)
 import Html.Attributes exposing (style)
 import Svg.Events exposing (onClick)
 import Svg exposing (Svg)
-import Svg.Attributes as Attr
+import Svg.Attributes
+import Svg.TypedAttributes as Attr
 import Window
 import AnimationFrame
 import Clock exposing (Clock)
@@ -296,7 +296,7 @@ frame : Window.Size -> List (Svg a) -> Html a
 frame window contents =
     let
         slightlyLessThan x =
-            toString (x * 24 // 25)
+            Attr.num <| toFloat <| x * 24 // 25
     in
         Html.div
             [ style
@@ -326,14 +326,11 @@ viewBox landscape =
                 , y = dims.outerMargin + dims.innerMargin + dims.height
                 }
     in
-        [ -halfRadius.x
-        , -halfRadius.y
-        , 2 * halfRadius.x
-        , 2 * halfRadius.y
-        ]
-            |> List.map toString
-            |> String.join " "
-            |> Attr.viewBox
+        Attr.viewBox
+            -halfRadius.x
+            -halfRadius.y
+            (2 * halfRadius.x)
+            (2 * halfRadius.y)
 
 
 stableWobbler : Time -> List (Svg Action)
@@ -341,11 +338,11 @@ stableWobbler time =
     let
         consultButton =
             Svg.circle
-                [ Attr.cx "0"
-                , Attr.cy "0"
-                , Attr.r "30"
-                , Attr.fill "none"
-                , Attr.pointerEvents "visible"
+                [ Attr.cx (Attr.num 0)
+                , Attr.cy (Attr.num 0)
+                , Attr.r (Attr.num 30)
+                , Attr.fill (Attr.noPaint)
+                , Attr.pointerEventsVisible
                 , onClick (Consult time)
                 ]
                 []
@@ -406,16 +403,16 @@ wobbler amplitudes =
     let
         color i =
             if i % 2 == 0 then
-                "black"
+                Color.black
             else
-                "white"
+                Color.white
 
         drawCircle i radius =
             Svg.circle
-                [ Attr.cx "0"
-                , Attr.cy "0"
-                , Attr.fill (color i)
-                , Attr.r (toString radius)
+                [ Attr.cx (Attr.num 0)
+                , Attr.cy (Attr.num 0)
+                , Attr.fill (Attr.color (color i))
+                , Attr.r (Attr.num radius)
                 ]
                 []
     in
@@ -475,7 +472,7 @@ drawTextFadeIn : Bool -> Float -> List Line -> List (Svg a)
 drawTextFadeIn landscape progress lines =
     let
         opacity =
-            Attr.opacity <| toString progress
+            Attr.opacity progress
     in
         [ Svg.g
             [ translate (firstPosition landscape) ]
@@ -520,7 +517,7 @@ drawNoSplitTextFadeIn progress lines =
         (drawFirstLines lines)
     , Svg.g
         [ translate centerPosition
-        , Attr.opacity <| toString progress
+        , Attr.opacity progress
         ]
         (drawText (List.map Tuple.first lines))
     ]
@@ -546,11 +543,9 @@ mix percent ( x1, y1 ) ( x2, y2 ) =
         ( m x1 x2, m y1 y2 )
 
 
-translate : ( number, number_ ) -> Attribute a
+translate : ( number, number ) -> Attribute a
 translate ( x, y ) =
-    [ "translate(", toString x, ",", toString y, ")" ]
-        |> String.concat
-        |> Attr.transform
+    Attr.transform [ Attr.translate x y ]
 
 
 firstPosition : Bool -> ( Int, Int )
@@ -596,7 +591,7 @@ drawLinesFadingIn percent lines =
     lines
         |> List.indexedMap
             (\i ( first, _ ) ->
-                drawHalfLine "white" percent i first
+                drawHalfLine Color.white percent i first
             )
 
 
@@ -605,7 +600,7 @@ drawLinesSplitting lines =
     lines
         |> List.indexedMap
             (\i ( first, _ ) ->
-                drawHalfLine "blue" 1 i first
+                drawHalfLine Color.blue 1 i first
             )
 
 
@@ -622,7 +617,7 @@ drawLinesMorphing percent lines =
                         drawHalfLineMorphing percent i
 
                     _ ->
-                        drawHalfLine "blue" 1 i first
+                        drawHalfLine Color.blue 1 i first
             )
 
 
@@ -631,7 +626,7 @@ drawFirstLines lines =
     lines
         |> List.indexedMap
             (\i ( first, _ ) ->
-                drawHalfLine "white" 1 i first
+                drawHalfLine Color.white 1 i first
             )
 
 
@@ -639,11 +634,10 @@ drawSecondLinesLightening : Float -> List Line -> List (Svg a)
 drawSecondLinesLightening progress lines =
     let
         color =
-            Color.Convert.colorToHex <|
-                Color.Manipulate.weightedMix
-                    Color.white
-                    (Color.rgb 0 0 255)
-                    progress
+            Color.Manipulate.weightedMix
+                Color.white
+                Color.blue
+                progress
     in
         lines
             |> List.indexedMap
@@ -657,7 +651,7 @@ drawSecondLines lines =
     lines
         |> List.indexedMap
             (\i ( _, second ) ->
-                drawHalfLine "white" 1 i second
+                drawHalfLine Color.white 1 i second
             )
 
 
@@ -675,11 +669,11 @@ drawHalfLineMorphing percent index =
 
         rect x width =
             Svg.rect
-                [ Attr.y <| toString yOffset
-                , Attr.height <| toString height
-                , Attr.x <| toString x
-                , Attr.width <| toString width
-                , Attr.fill "blue"
+                [ Attr.y (Attr.num yOffset)
+                , Attr.height (Attr.num height)
+                , Attr.x (Attr.num x)
+                , Attr.width (Attr.num width)
+                , Attr.fill (Attr.color Color.blue)
                 ]
                 []
     in
@@ -689,7 +683,7 @@ drawHalfLineMorphing percent index =
             ]
 
 
-drawHalfLine : String -> Float -> Int -> Bool -> Svg a
+drawHalfLine : Color -> Float -> Int -> Bool -> Svg a
 drawHalfLine color percent index isYang =
     let
         fullHeight =
@@ -706,11 +700,11 @@ drawHalfLine color percent index isYang =
 
         rect x width =
             Svg.rect
-                [ Attr.y <| toString y
-                , Attr.height <| toString height
-                , Attr.x <| toString x
-                , Attr.width <| toString width
-                , Attr.fill color
+                [ Attr.y (Attr.num y)
+                , Attr.height (Attr.num height)
+                , Attr.x (Attr.num x)
+                , Attr.width (Attr.num width)
+                , Attr.fill (Attr.color color)
                 ]
                 []
     in
@@ -744,29 +738,29 @@ drawText halfLines =
 
         numberLine =
             Svg.text_
-                [ Attr.fontFamily "sans-serif"
-                , Attr.fontSize "11"
-                , Attr.fontWeight "bold"
-                , Attr.fill "yellow"
-                , Attr.x "5"
-                , Attr.y "105"
+                [ Attr.fontFamily [ "sans-serif" ]
+                , Attr.fontSize (Attr.num 11)
+                , Attr.bold
+                , Attr.fill (Attr.color Color.yellow)
+                , Attr.x (Attr.num 5)
+                , Attr.y (Attr.num 105)
                 ]
                 [ Svg.text (toString number) ]
 
         titleLine y text =
             Svg.text_
-                [ Attr.fontFamily "serif"
-                , Attr.fontSize "11"
-                , Attr.fontStyle "italic"
-                , Attr.fill "white"
-                , Attr.x "5"
-                , Attr.y y
+                [ Attr.fontFamily [ "serif" ]
+                , Attr.fontSize (Attr.num 11)
+                , Svg.Attributes.fontStyle "italic"
+                , Attr.fill (Attr.color Color.white)
+                , Attr.x (Attr.num 5)
+                , Attr.y (Attr.num y)
                 ]
                 [ Svg.text text ]
 
         title =
             String.lines name
-                |> List.map2 titleLine [ "125", "140" ]
+                |> List.map2 titleLine [ 125, 140 ]
     in
         numberLine :: title
 

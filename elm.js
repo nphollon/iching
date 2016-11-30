@@ -7324,126 +7324,6 @@ var _elm_lang$core$Json_Decode$bool = _elm_lang$core$Native_Json.decodePrimitive
 var _elm_lang$core$Json_Decode$string = _elm_lang$core$Native_Json.decodePrimitive('string');
 var _elm_lang$core$Json_Decode$Decoder = {ctor: 'Decoder'};
 
-//import Maybe, Native.List //
-
-var _elm_lang$core$Native_Regex = function() {
-
-function escape(str)
-{
-	return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-}
-function caseInsensitive(re)
-{
-	return new RegExp(re.source, 'gi');
-}
-function regex(raw)
-{
-	return new RegExp(raw, 'g');
-}
-
-function contains(re, string)
-{
-	return string.match(re) !== null;
-}
-
-function find(n, re, str)
-{
-	n = n.ctor === 'All' ? Infinity : n._0;
-	var out = [];
-	var number = 0;
-	var string = str;
-	var lastIndex = re.lastIndex;
-	var prevLastIndex = -1;
-	var result;
-	while (number++ < n && (result = re.exec(string)))
-	{
-		if (prevLastIndex === re.lastIndex) break;
-		var i = result.length - 1;
-		var subs = new Array(i);
-		while (i > 0)
-		{
-			var submatch = result[i];
-			subs[--i] = submatch === undefined
-				? _elm_lang$core$Maybe$Nothing
-				: _elm_lang$core$Maybe$Just(submatch);
-		}
-		out.push({
-			match: result[0],
-			submatches: _elm_lang$core$Native_List.fromArray(subs),
-			index: result.index,
-			number: number
-		});
-		prevLastIndex = re.lastIndex;
-	}
-	re.lastIndex = lastIndex;
-	return _elm_lang$core$Native_List.fromArray(out);
-}
-
-function replace(n, re, replacer, string)
-{
-	n = n.ctor === 'All' ? Infinity : n._0;
-	var count = 0;
-	function jsReplacer(match)
-	{
-		if (count++ >= n)
-		{
-			return match;
-		}
-		var i = arguments.length - 3;
-		var submatches = new Array(i);
-		while (i > 0)
-		{
-			var submatch = arguments[i];
-			submatches[--i] = submatch === undefined
-				? _elm_lang$core$Maybe$Nothing
-				: _elm_lang$core$Maybe$Just(submatch);
-		}
-		return replacer({
-			match: match,
-			submatches: _elm_lang$core$Native_List.fromArray(submatches),
-			index: arguments[arguments.length - 2],
-			number: count
-		});
-	}
-	return string.replace(re, jsReplacer);
-}
-
-function split(n, re, str)
-{
-	n = n.ctor === 'All' ? Infinity : n._0;
-	if (n === Infinity)
-	{
-		return _elm_lang$core$Native_List.fromArray(str.split(re));
-	}
-	var string = str;
-	var result;
-	var out = [];
-	var start = re.lastIndex;
-	var restoreLastIndex = re.lastIndex;
-	while (n--)
-	{
-		if (!(result = re.exec(string))) break;
-		out.push(string.slice(start, result.index));
-		start = re.lastIndex;
-	}
-	out.push(string.slice(start));
-	re.lastIndex = restoreLastIndex;
-	return _elm_lang$core$Native_List.fromArray(out);
-}
-
-return {
-	regex: regex,
-	caseInsensitive: caseInsensitive,
-	escape: escape,
-
-	contains: F2(contains),
-	find: F3(find),
-	replace: F4(replace),
-	split: F3(split)
-};
-
-}();
-
 var _elm_lang$core$Random$onSelfMsg = F3(
 	function (_p1, _p0, seed) {
 		return _elm_lang$core$Task$succeed(seed);
@@ -7822,23 +7702,6 @@ var _elm_lang$core$Random$cmdMap = F2(
 			A2(_elm_lang$core$Random$map, func, _p79._0));
 	});
 _elm_lang$core$Native_Platform.effectManagers['Random'] = {pkg: 'elm-lang/core', init: _elm_lang$core$Random$init, onEffects: _elm_lang$core$Random$onEffects, onSelfMsg: _elm_lang$core$Random$onSelfMsg, tag: 'cmd', cmdMap: _elm_lang$core$Random$cmdMap};
-
-var _elm_lang$core$Regex$split = _elm_lang$core$Native_Regex.split;
-var _elm_lang$core$Regex$replace = _elm_lang$core$Native_Regex.replace;
-var _elm_lang$core$Regex$find = _elm_lang$core$Native_Regex.find;
-var _elm_lang$core$Regex$contains = _elm_lang$core$Native_Regex.contains;
-var _elm_lang$core$Regex$caseInsensitive = _elm_lang$core$Native_Regex.caseInsensitive;
-var _elm_lang$core$Regex$regex = _elm_lang$core$Native_Regex.regex;
-var _elm_lang$core$Regex$escape = _elm_lang$core$Native_Regex.escape;
-var _elm_lang$core$Regex$Match = F4(
-	function (a, b, c, d) {
-		return {match: a, submatches: b, index: c, number: d};
-	});
-var _elm_lang$core$Regex$Regex = {ctor: 'Regex'};
-var _elm_lang$core$Regex$AtMost = function (a) {
-	return {ctor: 'AtMost', _0: a};
-};
-var _elm_lang$core$Regex$All = {ctor: 'All'};
 
 var _elm_lang$dom$Native_Dom = function() {
 
@@ -10905,395 +10768,6 @@ var _elm_lang$window$Window$subMap = F2(
 	});
 _elm_lang$core$Native_Platform.effectManagers['Window'] = {pkg: 'elm-lang/window', init: _elm_lang$window$Window$init, onEffects: _elm_lang$window$Window$onEffects, onSelfMsg: _elm_lang$window$Window$onSelfMsg, tag: 'sub', subMap: _elm_lang$window$Window$subMap};
 
-var _fredcy$elm_parseint$ParseInt$charFromInt = function (i) {
-	return (_elm_lang$core$Native_Utils.cmp(i, 10) < 0) ? _elm_lang$core$Char$fromCode(
-		i + _elm_lang$core$Char$toCode(
-			_elm_lang$core$Native_Utils.chr('0'))) : ((_elm_lang$core$Native_Utils.cmp(i, 36) < 0) ? _elm_lang$core$Char$fromCode(
-		(i - 10) + _elm_lang$core$Char$toCode(
-			_elm_lang$core$Native_Utils.chr('A'))) : _elm_lang$core$Native_Utils.crash(
-		'ParseInt',
-		{
-			start: {line: 158, column: 9},
-			end: {line: 158, column: 20}
-		})(
-		_elm_lang$core$Basics$toString(i)));
-};
-var _fredcy$elm_parseint$ParseInt$toRadixUnsafe = F2(
-	function (radix, i) {
-		return (_elm_lang$core$Native_Utils.cmp(i, radix) < 0) ? _elm_lang$core$String$fromChar(
-			_fredcy$elm_parseint$ParseInt$charFromInt(i)) : A2(
-			_elm_lang$core$Basics_ops['++'],
-			A2(_fredcy$elm_parseint$ParseInt$toRadixUnsafe, radix, (i / radix) | 0),
-			_elm_lang$core$String$fromChar(
-				_fredcy$elm_parseint$ParseInt$charFromInt(
-					A2(_elm_lang$core$Basics_ops['%'], i, radix))));
-	});
-var _fredcy$elm_parseint$ParseInt$toOct = _fredcy$elm_parseint$ParseInt$toRadixUnsafe(8);
-var _fredcy$elm_parseint$ParseInt$toHex = _fredcy$elm_parseint$ParseInt$toRadixUnsafe(16);
-var _fredcy$elm_parseint$ParseInt$isBetween = F3(
-	function (lower, upper, c) {
-		var ci = _elm_lang$core$Char$toCode(c);
-		return (_elm_lang$core$Native_Utils.cmp(
-			_elm_lang$core$Char$toCode(lower),
-			ci) < 1) && (_elm_lang$core$Native_Utils.cmp(
-			ci,
-			_elm_lang$core$Char$toCode(upper)) < 1);
-	});
-var _fredcy$elm_parseint$ParseInt$charOffset = F2(
-	function (basis, c) {
-		return _elm_lang$core$Char$toCode(c) - _elm_lang$core$Char$toCode(basis);
-	});
-var _fredcy$elm_parseint$ParseInt$InvalidRadix = function (a) {
-	return {ctor: 'InvalidRadix', _0: a};
-};
-var _fredcy$elm_parseint$ParseInt$toRadix = F2(
-	function (radix, i) {
-		return ((_elm_lang$core$Native_Utils.cmp(2, radix) < 1) && (_elm_lang$core$Native_Utils.cmp(radix, 36) < 1)) ? ((_elm_lang$core$Native_Utils.cmp(i, 0) < 0) ? _elm_lang$core$Result$Ok(
-			A2(
-				_elm_lang$core$Basics_ops['++'],
-				'-',
-				A2(_fredcy$elm_parseint$ParseInt$toRadixUnsafe, radix, 0 - i))) : _elm_lang$core$Result$Ok(
-			A2(_fredcy$elm_parseint$ParseInt$toRadixUnsafe, radix, i))) : _elm_lang$core$Result$Err(
-			_fredcy$elm_parseint$ParseInt$InvalidRadix(radix));
-	});
-var _fredcy$elm_parseint$ParseInt$OutOfRange = function (a) {
-	return {ctor: 'OutOfRange', _0: a};
-};
-var _fredcy$elm_parseint$ParseInt$InvalidChar = function (a) {
-	return {ctor: 'InvalidChar', _0: a};
-};
-var _fredcy$elm_parseint$ParseInt$intFromChar = F2(
-	function (radix, c) {
-		var validInt = function (i) {
-			return (_elm_lang$core$Native_Utils.cmp(i, radix) < 0) ? _elm_lang$core$Result$Ok(i) : _elm_lang$core$Result$Err(
-				_fredcy$elm_parseint$ParseInt$OutOfRange(c));
-		};
-		var toInt = A3(
-			_fredcy$elm_parseint$ParseInt$isBetween,
-			_elm_lang$core$Native_Utils.chr('0'),
-			_elm_lang$core$Native_Utils.chr('9'),
-			c) ? _elm_lang$core$Result$Ok(
-			A2(
-				_fredcy$elm_parseint$ParseInt$charOffset,
-				_elm_lang$core$Native_Utils.chr('0'),
-				c)) : (A3(
-			_fredcy$elm_parseint$ParseInt$isBetween,
-			_elm_lang$core$Native_Utils.chr('a'),
-			_elm_lang$core$Native_Utils.chr('z'),
-			c) ? _elm_lang$core$Result$Ok(
-			10 + A2(
-				_fredcy$elm_parseint$ParseInt$charOffset,
-				_elm_lang$core$Native_Utils.chr('a'),
-				c)) : (A3(
-			_fredcy$elm_parseint$ParseInt$isBetween,
-			_elm_lang$core$Native_Utils.chr('A'),
-			_elm_lang$core$Native_Utils.chr('Z'),
-			c) ? _elm_lang$core$Result$Ok(
-			10 + A2(
-				_fredcy$elm_parseint$ParseInt$charOffset,
-				_elm_lang$core$Native_Utils.chr('A'),
-				c)) : _elm_lang$core$Result$Err(
-			_fredcy$elm_parseint$ParseInt$InvalidChar(c))));
-		return A2(_elm_lang$core$Result$andThen, validInt, toInt);
-	});
-var _fredcy$elm_parseint$ParseInt$parseIntR = F2(
-	function (radix, rstring) {
-		var _p0 = _elm_lang$core$String$uncons(rstring);
-		if (_p0.ctor === 'Nothing') {
-			return _elm_lang$core$Result$Ok(0);
-		} else {
-			return A2(
-				_elm_lang$core$Result$andThen,
-				function (ci) {
-					return A2(
-						_elm_lang$core$Result$andThen,
-						function (ri) {
-							return _elm_lang$core$Result$Ok(ci + (ri * radix));
-						},
-						A2(_fredcy$elm_parseint$ParseInt$parseIntR, radix, _p0._0._1));
-				},
-				A2(_fredcy$elm_parseint$ParseInt$intFromChar, radix, _p0._0._0));
-		}
-	});
-var _fredcy$elm_parseint$ParseInt$parseIntRadix = F2(
-	function (radix, string) {
-		return ((_elm_lang$core$Native_Utils.cmp(2, radix) < 1) && (_elm_lang$core$Native_Utils.cmp(radix, 36) < 1)) ? A2(
-			_fredcy$elm_parseint$ParseInt$parseIntR,
-			radix,
-			_elm_lang$core$String$reverse(string)) : _elm_lang$core$Result$Err(
-			_fredcy$elm_parseint$ParseInt$InvalidRadix(radix));
-	});
-var _fredcy$elm_parseint$ParseInt$parseInt = _fredcy$elm_parseint$ParseInt$parseIntRadix(10);
-var _fredcy$elm_parseint$ParseInt$parseIntOct = _fredcy$elm_parseint$ParseInt$parseIntRadix(8);
-var _fredcy$elm_parseint$ParseInt$parseIntHex = _fredcy$elm_parseint$ParseInt$parseIntRadix(16);
-
-var _eskimoblood$elm_color_extra$Color_Convert$xyzToColor = function (_p0) {
-	var _p1 = _p0;
-	var c = function (ch) {
-		var ch_ = (_elm_lang$core$Native_Utils.cmp(ch, 3.1308e-3) > 0) ? ((1.055 * Math.pow(ch, 1 / 2.4)) - 5.5e-2) : (12.92 * ch);
-		return _elm_lang$core$Basics$round(
-			A3(_elm_lang$core$Basics$clamp, 0, 255, ch_ * 255));
-	};
-	var z_ = _p1.z / 100;
-	var y_ = _p1.y / 100;
-	var x_ = _p1.x / 100;
-	var r = ((x_ * 3.2404542) + (y_ * -1.5371385)) + (z_ * -0.4986);
-	var g = ((x_ * -0.969266) + (y_ * 1.8760108)) + (z_ * 4.1556e-2);
-	var b = ((x_ * 5.56434e-2) + (y_ * -0.2040259)) + (z_ * 1.0572252);
-	return A3(
-		_elm_lang$core$Color$rgb,
-		c(r),
-		c(g),
-		c(b));
-};
-var _eskimoblood$elm_color_extra$Color_Convert$labToXyz = function (_p2) {
-	var _p3 = _p2;
-	var y = (_p3.l + 16) / 116;
-	var c = function (ch) {
-		var ch_ = (ch * ch) * ch;
-		return (_elm_lang$core$Native_Utils.cmp(ch_, 8.856e-3) > 0) ? ch_ : ((ch - (16 / 116)) / 7.787);
-	};
-	return {
-		y: c(y) * 100,
-		x: c(y + (_p3.a / 500)) * 95.047,
-		z: c(y - (_p3.b / 200)) * 108.883
-	};
-};
-var _eskimoblood$elm_color_extra$Color_Convert$labToColor = function (lab) {
-	return _eskimoblood$elm_color_extra$Color_Convert$xyzToColor(
-		_eskimoblood$elm_color_extra$Color_Convert$labToXyz(lab));
-};
-var _eskimoblood$elm_color_extra$Color_Convert$xyzToLab = function (_p4) {
-	var _p5 = _p4;
-	var c = function (ch) {
-		return (_elm_lang$core$Native_Utils.cmp(ch, 8.856e-3) > 0) ? Math.pow(ch, 1 / 3) : ((7.787 * ch) + (16 / 116));
-	};
-	var x_ = c(_p5.x / 95.047);
-	var y_ = c(_p5.y / 100);
-	var z_ = c(_p5.z / 108.883);
-	return {l: (116 * y_) - 16, a: 500 * (x_ - y_), b: 200 * (y_ - z_)};
-};
-var _eskimoblood$elm_color_extra$Color_Convert$colorToXyz = function (cl) {
-	var _p6 = _elm_lang$core$Color$toRgb(cl);
-	var red = _p6.red;
-	var green = _p6.green;
-	var blue = _p6.blue;
-	var c = function (ch) {
-		var ch_ = _elm_lang$core$Basics$toFloat(ch) / 255;
-		var ch__ = (_elm_lang$core$Native_Utils.cmp(ch_, 4.045e-2) > 0) ? Math.pow((ch_ + 5.5e-2) / 1.055, 2.4) : (ch_ / 12.92);
-		return ch__ * 100;
-	};
-	var r = c(red);
-	var g = c(green);
-	var b = c(blue);
-	return {x: ((r * 0.4124) + (g * 0.3576)) + (b * 0.1805), y: ((r * 0.2126) + (g * 0.7152)) + (b * 7.22e-2), z: ((r * 1.93e-2) + (g * 0.1192)) + (b * 0.9505)};
-};
-var _eskimoblood$elm_color_extra$Color_Convert$colorToLab = function (cl) {
-	return _eskimoblood$elm_color_extra$Color_Convert$xyzToLab(
-		_eskimoblood$elm_color_extra$Color_Convert$colorToXyz(cl));
-};
-var _eskimoblood$elm_color_extra$Color_Convert$toRadix = function (n) {
-	var getChr = function (c) {
-		return (_elm_lang$core$Native_Utils.cmp(c, 10) < 0) ? _elm_lang$core$Basics$toString(c) : _elm_lang$core$String$fromChar(
-			_elm_lang$core$Char$fromCode(87 + c));
-	};
-	return (_elm_lang$core$Native_Utils.cmp(n, 16) < 0) ? getChr(n) : A2(
-		_elm_lang$core$Basics_ops['++'],
-		_eskimoblood$elm_color_extra$Color_Convert$toRadix((n / 16) | 0),
-		getChr(
-			A2(_elm_lang$core$Basics_ops['%'], n, 16)));
-};
-var _eskimoblood$elm_color_extra$Color_Convert$toHex = function (n) {
-	var hex = _eskimoblood$elm_color_extra$Color_Convert$toRadix(n);
-	return _elm_lang$core$Native_Utils.eq(
-		_elm_lang$core$String$length(hex),
-		1) ? A2(_elm_lang$core$Basics_ops['++'], '0', hex) : hex;
-};
-var _eskimoblood$elm_color_extra$Color_Convert$colorToHex = function (cl) {
-	var _p7 = _elm_lang$core$Color$toRgb(cl);
-	var red = _p7.red;
-	var green = _p7.green;
-	var blue = _p7.blue;
-	var alpha = _p7.alpha;
-	return A2(
-		_elm_lang$core$Basics_ops['++'],
-		'#',
-		A2(
-			_elm_lang$core$Basics_ops['++'],
-			_eskimoblood$elm_color_extra$Color_Convert$toHex(red),
-			A2(
-				_elm_lang$core$Basics_ops['++'],
-				_eskimoblood$elm_color_extra$Color_Convert$toHex(green),
-				_eskimoblood$elm_color_extra$Color_Convert$toHex(blue))));
-};
-var _eskimoblood$elm_color_extra$Color_Convert$hexToColor = function (c) {
-	var r = _elm_lang$core$List$head(
-		A2(
-			_elm_lang$core$List$map,
-			function (_) {
-				return _.submatches;
-			},
-			A3(
-				_elm_lang$core$Regex$find,
-				_elm_lang$core$Regex$All,
-				_elm_lang$core$Regex$regex('^#?([a-f\\d]{2})([a-f\\d]{2})([a-f\\d]{2})$'),
-				_elm_lang$core$String$toLower(c))));
-	var _p8 = r;
-	if (_p8.ctor === 'Just') {
-		var v = A2(
-			_elm_lang$core$List$filterMap,
-			_elm_lang$core$Basics$identity,
-			A2(
-				_elm_lang$core$List$map,
-				_elm_lang$core$Result$toMaybe,
-				A2(
-					_elm_lang$core$List$map,
-					_fredcy$elm_parseint$ParseInt$parseIntHex,
-					A2(_elm_lang$core$List$filterMap, _elm_lang$core$Basics$identity, _p8._0))));
-		var _p9 = v;
-		if ((((_p9.ctor === '::') && (_p9._1.ctor === '::')) && (_p9._1._1.ctor === '::')) && (_p9._1._1._1.ctor === '[]')) {
-			return _elm_lang$core$Maybe$Just(
-				A3(_elm_lang$core$Color$rgb, _p9._0, _p9._1._0, _p9._1._1._0));
-		} else {
-			return _elm_lang$core$Maybe$Nothing;
-		}
-	} else {
-		return _elm_lang$core$Maybe$Nothing;
-	}
-};
-var _eskimoblood$elm_color_extra$Color_Convert$cssColorString = F2(
-	function (kind, values) {
-		return A2(
-			_elm_lang$core$Basics_ops['++'],
-			kind,
-			A2(
-				_elm_lang$core$Basics_ops['++'],
-				'(',
-				A2(
-					_elm_lang$core$Basics_ops['++'],
-					A2(_elm_lang$core$String$join, ', ', values),
-					')')));
-	});
-var _eskimoblood$elm_color_extra$Color_Convert$toPercentString = function (h) {
-	return A2(
-		_elm_lang$core$Basics_ops['++'],
-		_elm_lang$core$Basics$toString(
-			_elm_lang$core$Basics$round(h * 100)),
-		'%');
-};
-var _eskimoblood$elm_color_extra$Color_Convert$hueToString = function (h) {
-	return _elm_lang$core$Basics$toString(
-		_elm_lang$core$Basics$round((h * 180) / _elm_lang$core$Basics$pi));
-};
-var _eskimoblood$elm_color_extra$Color_Convert$colorToCssHsla = function (cl) {
-	var _p10 = _elm_lang$core$Color$toHsl(cl);
-	var hue = _p10.hue;
-	var saturation = _p10.saturation;
-	var lightness = _p10.lightness;
-	var alpha = _p10.alpha;
-	return A2(
-		_eskimoblood$elm_color_extra$Color_Convert$cssColorString,
-		'hsla',
-		{
-			ctor: '::',
-			_0: _eskimoblood$elm_color_extra$Color_Convert$hueToString(hue),
-			_1: {
-				ctor: '::',
-				_0: _eskimoblood$elm_color_extra$Color_Convert$toPercentString(saturation),
-				_1: {
-					ctor: '::',
-					_0: _eskimoblood$elm_color_extra$Color_Convert$toPercentString(lightness),
-					_1: {
-						ctor: '::',
-						_0: _elm_lang$core$Basics$toString(alpha),
-						_1: {ctor: '[]'}
-					}
-				}
-			}
-		});
-};
-var _eskimoblood$elm_color_extra$Color_Convert$colorToCssHsl = function (cl) {
-	var _p11 = _elm_lang$core$Color$toHsl(cl);
-	var hue = _p11.hue;
-	var saturation = _p11.saturation;
-	var lightness = _p11.lightness;
-	var alpha = _p11.alpha;
-	return A2(
-		_eskimoblood$elm_color_extra$Color_Convert$cssColorString,
-		'hsl',
-		{
-			ctor: '::',
-			_0: _eskimoblood$elm_color_extra$Color_Convert$hueToString(hue),
-			_1: {
-				ctor: '::',
-				_0: _eskimoblood$elm_color_extra$Color_Convert$toPercentString(saturation),
-				_1: {
-					ctor: '::',
-					_0: _eskimoblood$elm_color_extra$Color_Convert$toPercentString(lightness),
-					_1: {ctor: '[]'}
-				}
-			}
-		});
-};
-var _eskimoblood$elm_color_extra$Color_Convert$colorToCssRgba = function (cl) {
-	var _p12 = _elm_lang$core$Color$toRgb(cl);
-	var red = _p12.red;
-	var green = _p12.green;
-	var blue = _p12.blue;
-	var alpha = _p12.alpha;
-	return A2(
-		_eskimoblood$elm_color_extra$Color_Convert$cssColorString,
-		'rgba',
-		{
-			ctor: '::',
-			_0: _elm_lang$core$Basics$toString(red),
-			_1: {
-				ctor: '::',
-				_0: _elm_lang$core$Basics$toString(green),
-				_1: {
-					ctor: '::',
-					_0: _elm_lang$core$Basics$toString(blue),
-					_1: {
-						ctor: '::',
-						_0: _elm_lang$core$Basics$toString(alpha),
-						_1: {ctor: '[]'}
-					}
-				}
-			}
-		});
-};
-var _eskimoblood$elm_color_extra$Color_Convert$colorToCssRgb = function (cl) {
-	var _p13 = _elm_lang$core$Color$toRgb(cl);
-	var red = _p13.red;
-	var green = _p13.green;
-	var blue = _p13.blue;
-	var alpha = _p13.alpha;
-	return A2(
-		_eskimoblood$elm_color_extra$Color_Convert$cssColorString,
-		'rgb',
-		{
-			ctor: '::',
-			_0: _elm_lang$core$Basics$toString(red),
-			_1: {
-				ctor: '::',
-				_0: _elm_lang$core$Basics$toString(green),
-				_1: {
-					ctor: '::',
-					_0: _elm_lang$core$Basics$toString(blue),
-					_1: {ctor: '[]'}
-				}
-			}
-		});
-};
-var _eskimoblood$elm_color_extra$Color_Convert$XYZ = F3(
-	function (a, b, c) {
-		return {x: a, y: b, z: c};
-	});
-var _eskimoblood$elm_color_extra$Color_Convert$Lab = F3(
-	function (a, b, c) {
-		return {l: a, a: b, b: c};
-	});
-
 var _eskimoblood$elm_color_extra$Color_Manipulate$mixChannel = F3(
 	function (weight, c1, c2) {
 		return _elm_lang$core$Basics$round(
@@ -11493,6 +10967,435 @@ var _nphollon$update_clock$Clock$update = F4(
 				_1: model
 			});
 	});
+
+var _user$project$Svg_TypedAttributes$viewBox = F4(
+	function (minX, minY, width, height) {
+		return _elm_lang$svg$Svg_Attributes$viewBox(
+			A2(
+				_elm_lang$core$String$join,
+				' ',
+				A2(
+					_elm_lang$core$List$map,
+					_elm_lang$core$Basics$toString,
+					{
+						ctor: '::',
+						_0: minX,
+						_1: {
+							ctor: '::',
+							_0: minY,
+							_1: {
+								ctor: '::',
+								_0: width,
+								_1: {
+									ctor: '::',
+									_0: height,
+									_1: {ctor: '[]'}
+								}
+							}
+						}
+					})));
+	});
+var _user$project$Svg_TypedAttributes$opacity = function (_p0) {
+	return _elm_lang$svg$Svg_Attributes$opacity(
+		_elm_lang$core$Basics$toString(_p0));
+};
+var _user$project$Svg_TypedAttributes$pointerEventsNone = _elm_lang$svg$Svg_Attributes$pointerEvents('none');
+var _user$project$Svg_TypedAttributes$pointerEventsAll = _elm_lang$svg$Svg_Attributes$pointerEvents('all');
+var _user$project$Svg_TypedAttributes$pointerEventsStroke = _elm_lang$svg$Svg_Attributes$pointerEvents('stroke');
+var _user$project$Svg_TypedAttributes$pointerEventsFill = _elm_lang$svg$Svg_Attributes$pointerEvents('fill');
+var _user$project$Svg_TypedAttributes$pointerEventsPainted = _elm_lang$svg$Svg_Attributes$pointerEvents('painted');
+var _user$project$Svg_TypedAttributes$pointerEventsVisible = _elm_lang$svg$Svg_Attributes$pointerEvents('visible');
+var _user$project$Svg_TypedAttributes$pointerEventsVisibleStroke = _elm_lang$svg$Svg_Attributes$pointerEvents('visibleStroke');
+var _user$project$Svg_TypedAttributes$pointerEventsVisibleFill = _elm_lang$svg$Svg_Attributes$pointerEvents('visibleFill');
+var _user$project$Svg_TypedAttributes$pointerEventsVisiblePainted = _elm_lang$svg$Svg_Attributes$pointerEvents('visiblePainted');
+var _user$project$Svg_TypedAttributes$xxSmall = _elm_lang$svg$Svg_Attributes$fontSize('xx-small');
+var _user$project$Svg_TypedAttributes$xxLarge = _elm_lang$svg$Svg_Attributes$fontSize('xx-large');
+var _user$project$Svg_TypedAttributes$xSmall = _elm_lang$svg$Svg_Attributes$fontSize('x-small');
+var _user$project$Svg_TypedAttributes$xLarge = _elm_lang$svg$Svg_Attributes$fontSize('x-large');
+var _user$project$Svg_TypedAttributes$smaller = _elm_lang$svg$Svg_Attributes$fontSize('smaller');
+var _user$project$Svg_TypedAttributes$small = _elm_lang$svg$Svg_Attributes$fontSize('small');
+var _user$project$Svg_TypedAttributes$normalWeight = _elm_lang$svg$Svg_Attributes$fontWeight('normal');
+var _user$project$Svg_TypedAttributes$medium = _elm_lang$svg$Svg_Attributes$fontSize('medium');
+var _user$project$Svg_TypedAttributes$lighter = _elm_lang$svg$Svg_Attributes$fontWeight('lighter');
+var _user$project$Svg_TypedAttributes$larger = _elm_lang$svg$Svg_Attributes$fontSize('larger');
+var _user$project$Svg_TypedAttributes$large = _elm_lang$svg$Svg_Attributes$fontSize('large');
+var _user$project$Svg_TypedAttributes$intWeight = function (i) {
+	var rounded = A3(_elm_lang$core$Basics$clamp, 100, 900, (((i + 50) / 100) | 0) * 100);
+	return _elm_lang$svg$Svg_Attributes$fontWeight(
+		_elm_lang$core$Basics$toString(rounded));
+};
+var _user$project$Svg_TypedAttributes$fontFamily = function (families) {
+	var _p1 = families;
+	if (_p1.ctor === '[]') {
+		return _elm_lang$svg$Svg_Attributes$fontFamily('inherit');
+	} else {
+		return _elm_lang$svg$Svg_Attributes$fontFamily(
+			A2(_elm_lang$core$String$join, ', ', families));
+	}
+};
+var _user$project$Svg_TypedAttributes$bolder = _elm_lang$svg$Svg_Attributes$fontWeight('bolder');
+var _user$project$Svg_TypedAttributes$bold = _elm_lang$svg$Svg_Attributes$fontWeight('bold');
+var _user$project$Svg_TypedAttributes$paintString = function (paint) {
+	var explicitPaintString = function (paint) {
+		var _p2 = paint;
+		switch (_p2.ctor) {
+			case 'NoPaint':
+				return 'none';
+			case 'CurrentColor':
+				return 'currentColor';
+			default:
+				var rgb = _elm_lang$core$Color$toRgb(_p2._0);
+				return _elm_lang$core$String$concat(
+					{
+						ctor: '::',
+						_0: 'rgb(',
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$core$Basics$toString(rgb.red),
+							_1: {
+								ctor: '::',
+								_0: ',',
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$core$Basics$toString(rgb.green),
+									_1: {
+										ctor: '::',
+										_0: ',',
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$core$Basics$toString(rgb.blue),
+											_1: {
+												ctor: '::',
+												_0: ')',
+												_1: {ctor: '[]'}
+											}
+										}
+									}
+								}
+							}
+						}
+					});
+		}
+	};
+	var _p3 = paint;
+	if (_p3.ctor === 'Explicit') {
+		return explicitPaintString(_p3._0);
+	} else {
+		return _elm_lang$core$String$concat(
+			{
+				ctor: '::',
+				_0: 'url(#',
+				_1: {
+					ctor: '::',
+					_0: _p3._0,
+					_1: {
+						ctor: '::',
+						_0: ') ',
+						_1: {
+							ctor: '::',
+							_0: explicitPaintString(_p3._1),
+							_1: {ctor: '[]'}
+						}
+					}
+				}
+			});
+	}
+};
+var _user$project$Svg_TypedAttributes$fill = function (_p4) {
+	return _elm_lang$svg$Svg_Attributes$fill(
+		_user$project$Svg_TypedAttributes$paintString(_p4));
+};
+var _user$project$Svg_TypedAttributes$transformString = function (xform) {
+	var _p5 = xform;
+	return _p5._0;
+};
+var _user$project$Svg_TypedAttributes$transform = function (_p6) {
+	return _elm_lang$svg$Svg_Attributes$transform(
+		A2(
+			_elm_lang$core$String$join,
+			' ',
+			A2(_elm_lang$core$List$map, _user$project$Svg_TypedAttributes$transformString, _p6)));
+};
+var _user$project$Svg_TypedAttributes$lengthString = function (length) {
+	var _p7 = length;
+	switch (_p7.ctor) {
+		case 'Cm':
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(_p7._0),
+				'cm');
+		case 'Em':
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(_p7._0),
+				'em');
+		case 'Ex':
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(_p7._0),
+				'ex');
+		case 'In':
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(_p7._0),
+				'in');
+		case 'Mm':
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(_p7._0),
+				'mm');
+		case 'Num':
+			return _elm_lang$core$Basics$toString(_p7._0);
+		case 'Pc':
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(_p7._0),
+				'pc');
+		case 'Percent':
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(_p7._0),
+				'%');
+		case 'Pt':
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(_p7._0),
+				'pt');
+		default:
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(_p7._0),
+				'px');
+	}
+};
+var _user$project$Svg_TypedAttributes$fontSize = function (_p8) {
+	return _elm_lang$svg$Svg_Attributes$fontSize(
+		_user$project$Svg_TypedAttributes$lengthString(_p8));
+};
+var _user$project$Svg_TypedAttributes$cx = function (_p9) {
+	return _elm_lang$svg$Svg_Attributes$cx(
+		_user$project$Svg_TypedAttributes$lengthString(_p9));
+};
+var _user$project$Svg_TypedAttributes$cy = function (_p10) {
+	return _elm_lang$svg$Svg_Attributes$cy(
+		_user$project$Svg_TypedAttributes$lengthString(_p10));
+};
+var _user$project$Svg_TypedAttributes$height = function (_p11) {
+	return _elm_lang$svg$Svg_Attributes$height(
+		_user$project$Svg_TypedAttributes$lengthString(_p11));
+};
+var _user$project$Svg_TypedAttributes$r = function (_p12) {
+	return _elm_lang$svg$Svg_Attributes$r(
+		_user$project$Svg_TypedAttributes$lengthString(_p12));
+};
+var _user$project$Svg_TypedAttributes$width = function (_p13) {
+	return _elm_lang$svg$Svg_Attributes$width(
+		_user$project$Svg_TypedAttributes$lengthString(_p13));
+};
+var _user$project$Svg_TypedAttributes$x = function (_p14) {
+	return _elm_lang$svg$Svg_Attributes$x(
+		_user$project$Svg_TypedAttributes$lengthString(_p14));
+};
+var _user$project$Svg_TypedAttributes$y = function (_p15) {
+	return _elm_lang$svg$Svg_Attributes$y(
+		_user$project$Svg_TypedAttributes$lengthString(_p15));
+};
+var _user$project$Svg_TypedAttributes$Px = function (a) {
+	return {ctor: 'Px', _0: a};
+};
+var _user$project$Svg_TypedAttributes$px = _user$project$Svg_TypedAttributes$Px;
+var _user$project$Svg_TypedAttributes$Pt = function (a) {
+	return {ctor: 'Pt', _0: a};
+};
+var _user$project$Svg_TypedAttributes$pt = _user$project$Svg_TypedAttributes$Pt;
+var _user$project$Svg_TypedAttributes$Percent = function (a) {
+	return {ctor: 'Percent', _0: a};
+};
+var _user$project$Svg_TypedAttributes$percent = _user$project$Svg_TypedAttributes$Percent;
+var _user$project$Svg_TypedAttributes$Pc = function (a) {
+	return {ctor: 'Pc', _0: a};
+};
+var _user$project$Svg_TypedAttributes$pc = _user$project$Svg_TypedAttributes$Pc;
+var _user$project$Svg_TypedAttributes$Num = function (a) {
+	return {ctor: 'Num', _0: a};
+};
+var _user$project$Svg_TypedAttributes$num = _user$project$Svg_TypedAttributes$Num;
+var _user$project$Svg_TypedAttributes$Mm = function (a) {
+	return {ctor: 'Mm', _0: a};
+};
+var _user$project$Svg_TypedAttributes$mm = _user$project$Svg_TypedAttributes$Mm;
+var _user$project$Svg_TypedAttributes$In = function (a) {
+	return {ctor: 'In', _0: a};
+};
+var _user$project$Svg_TypedAttributes$inch = _user$project$Svg_TypedAttributes$In;
+var _user$project$Svg_TypedAttributes$Ex = function (a) {
+	return {ctor: 'Ex', _0: a};
+};
+var _user$project$Svg_TypedAttributes$ex = _user$project$Svg_TypedAttributes$Ex;
+var _user$project$Svg_TypedAttributes$Em = function (a) {
+	return {ctor: 'Em', _0: a};
+};
+var _user$project$Svg_TypedAttributes$em = _user$project$Svg_TypedAttributes$Em;
+var _user$project$Svg_TypedAttributes$Cm = function (a) {
+	return {ctor: 'Cm', _0: a};
+};
+var _user$project$Svg_TypedAttributes$cm = _user$project$Svg_TypedAttributes$Cm;
+var _user$project$Svg_TypedAttributes$Transform = function (a) {
+	return {ctor: 'Transform', _0: a};
+};
+var _user$project$Svg_TypedAttributes$atomicTransform = F2(
+	function (name, args) {
+		return _user$project$Svg_TypedAttributes$Transform(
+			_elm_lang$core$String$concat(
+				{
+					ctor: '::',
+					_0: name,
+					_1: {
+						ctor: '::',
+						_0: '(',
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$core$String$join,
+								' ',
+								A2(_elm_lang$core$List$map, _elm_lang$core$Basics$toString, args)),
+							_1: {
+								ctor: '::',
+								_0: ')',
+								_1: {ctor: '[]'}
+							}
+						}
+					}
+				}));
+	});
+var _user$project$Svg_TypedAttributes$matrix = F6(
+	function (a, b, c, d, e, f) {
+		return A2(
+			_user$project$Svg_TypedAttributes$atomicTransform,
+			'matrix',
+			{
+				ctor: '::',
+				_0: a,
+				_1: {
+					ctor: '::',
+					_0: b,
+					_1: {
+						ctor: '::',
+						_0: c,
+						_1: {
+							ctor: '::',
+							_0: d,
+							_1: {
+								ctor: '::',
+								_0: e,
+								_1: {
+									ctor: '::',
+									_0: f,
+									_1: {ctor: '[]'}
+								}
+							}
+						}
+					}
+				}
+			});
+	});
+var _user$project$Svg_TypedAttributes$rotate = F3(
+	function (a, x, y) {
+		return A2(
+			_user$project$Svg_TypedAttributes$atomicTransform,
+			'rotate',
+			{
+				ctor: '::',
+				_0: a,
+				_1: {
+					ctor: '::',
+					_0: x,
+					_1: {
+						ctor: '::',
+						_0: y,
+						_1: {ctor: '[]'}
+					}
+				}
+			});
+	});
+var _user$project$Svg_TypedAttributes$scale = F2(
+	function (x, y) {
+		return A2(
+			_user$project$Svg_TypedAttributes$atomicTransform,
+			'scale',
+			{
+				ctor: '::',
+				_0: x,
+				_1: {
+					ctor: '::',
+					_0: y,
+					_1: {ctor: '[]'}
+				}
+			});
+	});
+var _user$project$Svg_TypedAttributes$skewX = function (x) {
+	return A2(
+		_user$project$Svg_TypedAttributes$atomicTransform,
+		'skewX',
+		{
+			ctor: '::',
+			_0: x,
+			_1: {ctor: '[]'}
+		});
+};
+var _user$project$Svg_TypedAttributes$skewY = function (y) {
+	return A2(
+		_user$project$Svg_TypedAttributes$atomicTransform,
+		'skewY',
+		{
+			ctor: '::',
+			_0: y,
+			_1: {ctor: '[]'}
+		});
+};
+var _user$project$Svg_TypedAttributes$translate = F2(
+	function (x, y) {
+		return A2(
+			_user$project$Svg_TypedAttributes$atomicTransform,
+			'translate',
+			{
+				ctor: '::',
+				_0: x,
+				_1: {
+					ctor: '::',
+					_0: y,
+					_1: {ctor: '[]'}
+				}
+			});
+	});
+var _user$project$Svg_TypedAttributes$Color = function (a) {
+	return {ctor: 'Color', _0: a};
+};
+var _user$project$Svg_TypedAttributes$CurrentColor = {ctor: 'CurrentColor'};
+var _user$project$Svg_TypedAttributes$NoPaint = {ctor: 'NoPaint'};
+var _user$project$Svg_TypedAttributes$Reference = F2(
+	function (a, b) {
+		return {ctor: 'Reference', _0: a, _1: b};
+	});
+var _user$project$Svg_TypedAttributes$paintRef = function (iri) {
+	return A2(_user$project$Svg_TypedAttributes$Reference, iri, _user$project$Svg_TypedAttributes$NoPaint);
+};
+var _user$project$Svg_TypedAttributes$paintRefWithDefault = F2(
+	function (iri, $default) {
+		return A2(
+			_user$project$Svg_TypedAttributes$Reference,
+			iri,
+			_user$project$Svg_TypedAttributes$Color($default));
+	});
+var _user$project$Svg_TypedAttributes$Explicit = function (a) {
+	return {ctor: 'Explicit', _0: a};
+};
+var _user$project$Svg_TypedAttributes$color = function (_p16) {
+	return _user$project$Svg_TypedAttributes$Explicit(
+		_user$project$Svg_TypedAttributes$Color(_p16));
+};
+var _user$project$Svg_TypedAttributes$currentColor = _user$project$Svg_TypedAttributes$Explicit(_user$project$Svg_TypedAttributes$CurrentColor);
+var _user$project$Svg_TypedAttributes$noPaint = _user$project$Svg_TypedAttributes$Explicit(_user$project$Svg_TypedAttributes$NoPaint);
 
 var _user$project$Main$signDetails = _elm_lang$core$Dict$fromList(
 	{
@@ -12015,22 +11918,31 @@ var _user$project$Main$drawText = function (halfLines) {
 				_elm_lang$svg$Svg$text_,
 				{
 					ctor: '::',
-					_0: _elm_lang$svg$Svg_Attributes$fontFamily('serif'),
+					_0: _user$project$Svg_TypedAttributes$fontFamily(
+						{
+							ctor: '::',
+							_0: 'serif',
+							_1: {ctor: '[]'}
+						}),
 					_1: {
 						ctor: '::',
-						_0: _elm_lang$svg$Svg_Attributes$fontSize('11'),
+						_0: _user$project$Svg_TypedAttributes$fontSize(
+							_user$project$Svg_TypedAttributes$num(11)),
 						_1: {
 							ctor: '::',
 							_0: _elm_lang$svg$Svg_Attributes$fontStyle('italic'),
 							_1: {
 								ctor: '::',
-								_0: _elm_lang$svg$Svg_Attributes$fill('white'),
+								_0: _user$project$Svg_TypedAttributes$fill(
+									_user$project$Svg_TypedAttributes$color(_elm_lang$core$Color$white)),
 								_1: {
 									ctor: '::',
-									_0: _elm_lang$svg$Svg_Attributes$x('5'),
+									_0: _user$project$Svg_TypedAttributes$x(
+										_user$project$Svg_TypedAttributes$num(5)),
 									_1: {
 										ctor: '::',
-										_0: _elm_lang$svg$Svg_Attributes$y(y),
+										_0: _user$project$Svg_TypedAttributes$y(
+											_user$project$Svg_TypedAttributes$num(y)),
 										_1: {ctor: '[]'}
 									}
 								}
@@ -12087,22 +11999,31 @@ var _user$project$Main$drawText = function (halfLines) {
 		_elm_lang$svg$Svg$text_,
 		{
 			ctor: '::',
-			_0: _elm_lang$svg$Svg_Attributes$fontFamily('sans-serif'),
+			_0: _user$project$Svg_TypedAttributes$fontFamily(
+				{
+					ctor: '::',
+					_0: 'sans-serif',
+					_1: {ctor: '[]'}
+				}),
 			_1: {
 				ctor: '::',
-				_0: _elm_lang$svg$Svg_Attributes$fontSize('11'),
+				_0: _user$project$Svg_TypedAttributes$fontSize(
+					_user$project$Svg_TypedAttributes$num(11)),
 				_1: {
 					ctor: '::',
-					_0: _elm_lang$svg$Svg_Attributes$fontWeight('bold'),
+					_0: _user$project$Svg_TypedAttributes$bold,
 					_1: {
 						ctor: '::',
-						_0: _elm_lang$svg$Svg_Attributes$fill('yellow'),
+						_0: _user$project$Svg_TypedAttributes$fill(
+							_user$project$Svg_TypedAttributes$color(_elm_lang$core$Color$yellow)),
 						_1: {
 							ctor: '::',
-							_0: _elm_lang$svg$Svg_Attributes$x('5'),
+							_0: _user$project$Svg_TypedAttributes$x(
+								_user$project$Svg_TypedAttributes$num(5)),
 							_1: {
 								ctor: '::',
-								_0: _elm_lang$svg$Svg_Attributes$y('105'),
+								_0: _user$project$Svg_TypedAttributes$y(
+									_user$project$Svg_TypedAttributes$num(105)),
 								_1: {ctor: '[]'}
 							}
 						}
@@ -12121,10 +12042,10 @@ var _user$project$Main$drawText = function (halfLines) {
 		titleLine,
 		{
 			ctor: '::',
-			_0: '125',
+			_0: 125,
 			_1: {
 				ctor: '::',
-				_0: '140',
+				_0: 140,
 				_1: {ctor: '[]'}
 			}
 		},
@@ -12143,23 +12064,24 @@ var _user$project$Main$drawHalfLine = F4(
 					_elm_lang$svg$Svg$rect,
 					{
 						ctor: '::',
-						_0: _elm_lang$svg$Svg_Attributes$y(
-							_elm_lang$core$Basics$toString(y)),
+						_0: _user$project$Svg_TypedAttributes$y(
+							_user$project$Svg_TypedAttributes$num(y)),
 						_1: {
 							ctor: '::',
-							_0: _elm_lang$svg$Svg_Attributes$height(
-								_elm_lang$core$Basics$toString(height)),
+							_0: _user$project$Svg_TypedAttributes$height(
+								_user$project$Svg_TypedAttributes$num(height)),
 							_1: {
 								ctor: '::',
-								_0: _elm_lang$svg$Svg_Attributes$x(
-									_elm_lang$core$Basics$toString(x)),
+								_0: _user$project$Svg_TypedAttributes$x(
+									_user$project$Svg_TypedAttributes$num(x)),
 								_1: {
 									ctor: '::',
-									_0: _elm_lang$svg$Svg_Attributes$width(
-										_elm_lang$core$Basics$toString(width)),
+									_0: _user$project$Svg_TypedAttributes$width(
+										_user$project$Svg_TypedAttributes$num(width)),
 									_1: {
 										ctor: '::',
-										_0: _elm_lang$svg$Svg_Attributes$fill(color),
+										_0: _user$project$Svg_TypedAttributes$fill(
+											_user$project$Svg_TypedAttributes$color(color)),
 										_1: {ctor: '[]'}
 									}
 								}
@@ -12192,23 +12114,24 @@ var _user$project$Main$drawHalfLineMorphing = F2(
 					_elm_lang$svg$Svg$rect,
 					{
 						ctor: '::',
-						_0: _elm_lang$svg$Svg_Attributes$y(
-							_elm_lang$core$Basics$toString(yOffset)),
+						_0: _user$project$Svg_TypedAttributes$y(
+							_user$project$Svg_TypedAttributes$num(yOffset)),
 						_1: {
 							ctor: '::',
-							_0: _elm_lang$svg$Svg_Attributes$height(
-								_elm_lang$core$Basics$toString(height)),
+							_0: _user$project$Svg_TypedAttributes$height(
+								_user$project$Svg_TypedAttributes$num(height)),
 							_1: {
 								ctor: '::',
-								_0: _elm_lang$svg$Svg_Attributes$x(
-									_elm_lang$core$Basics$toString(x)),
+								_0: _user$project$Svg_TypedAttributes$x(
+									_user$project$Svg_TypedAttributes$num(x)),
 								_1: {
 									ctor: '::',
-									_0: _elm_lang$svg$Svg_Attributes$width(
-										_elm_lang$core$Basics$toString(width)),
+									_0: _user$project$Svg_TypedAttributes$width(
+										_user$project$Svg_TypedAttributes$num(width)),
 									_1: {
 										ctor: '::',
-										_0: _elm_lang$svg$Svg_Attributes$fill('blue'),
+										_0: _user$project$Svg_TypedAttributes$fill(
+											_user$project$Svg_TypedAttributes$color(_elm_lang$core$Color$blue)),
 										_1: {ctor: '[]'}
 									}
 								}
@@ -12236,18 +12159,13 @@ var _user$project$Main$drawSecondLines = function (lines) {
 		F2(
 			function (i, _p1) {
 				var _p2 = _p1;
-				return A4(_user$project$Main$drawHalfLine, 'white', 1, i, _p2._1);
+				return A4(_user$project$Main$drawHalfLine, _elm_lang$core$Color$white, 1, i, _p2._1);
 			}),
 		lines);
 };
 var _user$project$Main$drawSecondLinesLightening = F2(
 	function (progress, lines) {
-		var color = _eskimoblood$elm_color_extra$Color_Convert$colorToHex(
-			A3(
-				_eskimoblood$elm_color_extra$Color_Manipulate$weightedMix,
-				_elm_lang$core$Color$white,
-				A3(_elm_lang$core$Color$rgb, 0, 0, 255),
-				progress));
+		var color = A3(_eskimoblood$elm_color_extra$Color_Manipulate$weightedMix, _elm_lang$core$Color$white, _elm_lang$core$Color$blue, progress);
 		return A2(
 			_elm_lang$core$List$indexedMap,
 			F2(
@@ -12263,7 +12181,7 @@ var _user$project$Main$drawFirstLines = function (lines) {
 		F2(
 			function (i, _p5) {
 				var _p6 = _p5;
-				return A4(_user$project$Main$drawHalfLine, 'white', 1, i, _p6._0);
+				return A4(_user$project$Main$drawHalfLine, _elm_lang$core$Color$white, 1, i, _p6._0);
 			}),
 		lines);
 };
@@ -12296,7 +12214,7 @@ var _user$project$Main$drawLinesMorphing = F2(
 							break _v4_2;
 						}
 					} while(false);
-					return A4(_user$project$Main$drawHalfLine, 'blue', 1, i, _p10);
+					return A4(_user$project$Main$drawHalfLine, _elm_lang$core$Color$blue, 1, i, _p10);
 				}),
 			lines);
 	});
@@ -12306,7 +12224,7 @@ var _user$project$Main$drawLinesSplitting = function (lines) {
 		F2(
 			function (i, _p11) {
 				var _p12 = _p11;
-				return A4(_user$project$Main$drawHalfLine, 'blue', 1, i, _p12._0);
+				return A4(_user$project$Main$drawHalfLine, _elm_lang$core$Color$blue, 1, i, _p12._0);
 			}),
 		lines);
 };
@@ -12317,7 +12235,7 @@ var _user$project$Main$drawLinesFadingIn = F2(
 			F2(
 				function (i, _p13) {
 					var _p14 = _p13;
-					return A4(_user$project$Main$drawHalfLine, 'white', percent, i, _p14._0);
+					return A4(_user$project$Main$drawHalfLine, _elm_lang$core$Color$white, percent, i, _p14._0);
 				}),
 			lines);
 	});
@@ -12331,29 +12249,12 @@ var _user$project$Main$firstPosition = function (landscape) {
 };
 var _user$project$Main$translate = function (_p15) {
 	var _p16 = _p15;
-	return _elm_lang$svg$Svg_Attributes$transform(
-		_elm_lang$core$String$concat(
-			{
-				ctor: '::',
-				_0: 'translate(',
-				_1: {
-					ctor: '::',
-					_0: _elm_lang$core$Basics$toString(_p16._0),
-					_1: {
-						ctor: '::',
-						_0: ',',
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$core$Basics$toString(_p16._1),
-							_1: {
-								ctor: '::',
-								_0: ')',
-								_1: {ctor: '[]'}
-							}
-						}
-					}
-				}
-			}));
+	return _user$project$Svg_TypedAttributes$transform(
+		{
+			ctor: '::',
+			_0: A2(_user$project$Svg_TypedAttributes$translate, _p16._0, _p16._1),
+			_1: {ctor: '[]'}
+		});
 };
 var _user$project$Main$mix = F3(
 	function (percent, _p18, _p17) {
@@ -12416,8 +12317,7 @@ var _user$project$Main$drawNoSplitTextFadeIn = F2(
 						_0: _user$project$Main$translate(_user$project$Main$centerPosition),
 						_1: {
 							ctor: '::',
-							_0: _elm_lang$svg$Svg_Attributes$opacity(
-								_elm_lang$core$Basics$toString(progress)),
+							_0: _user$project$Svg_TypedAttributes$opacity(progress),
 							_1: {ctor: '[]'}
 						}
 					},
@@ -12483,8 +12383,7 @@ var _user$project$Main$drawDoubleHexagram = F2(
 	});
 var _user$project$Main$drawTextFadeIn = F3(
 	function (landscape, progress, lines) {
-		var opacity = _elm_lang$svg$Svg_Attributes$opacity(
-			_elm_lang$core$Basics$toString(progress));
+		var opacity = _user$project$Svg_TypedAttributes$opacity(progress);
 		return {
 			ctor: '::',
 			_0: A2(
@@ -12650,7 +12549,7 @@ var _user$project$Main$wobbler = function (amplitudes) {
 	var color = function (i) {
 		return _elm_lang$core$Native_Utils.eq(
 			A2(_elm_lang$core$Basics_ops['%'], i, 2),
-			0) ? 'black' : 'white';
+			0) ? _elm_lang$core$Color$black : _elm_lang$core$Color$white;
 	};
 	var drawCircle = F2(
 		function (i, radius) {
@@ -12658,18 +12557,21 @@ var _user$project$Main$wobbler = function (amplitudes) {
 				_elm_lang$svg$Svg$circle,
 				{
 					ctor: '::',
-					_0: _elm_lang$svg$Svg_Attributes$cx('0'),
+					_0: _user$project$Svg_TypedAttributes$cx(
+						_user$project$Svg_TypedAttributes$num(0)),
 					_1: {
 						ctor: '::',
-						_0: _elm_lang$svg$Svg_Attributes$cy('0'),
+						_0: _user$project$Svg_TypedAttributes$cy(
+							_user$project$Svg_TypedAttributes$num(0)),
 						_1: {
 							ctor: '::',
-							_0: _elm_lang$svg$Svg_Attributes$fill(
-								color(i)),
+							_0: _user$project$Svg_TypedAttributes$fill(
+								_user$project$Svg_TypedAttributes$color(
+									color(i))),
 							_1: {
 								ctor: '::',
-								_0: _elm_lang$svg$Svg_Attributes$r(
-									_elm_lang$core$Basics$toString(radius)),
+								_0: _user$project$Svg_TypedAttributes$r(
+									_user$project$Svg_TypedAttributes$num(radius)),
 								_1: {ctor: '[]'}
 							}
 						}
@@ -12715,35 +12617,13 @@ var _user$project$Main$fadingWobbler = F2(
 	});
 var _user$project$Main$viewBox = function (landscape) {
 	var halfRadius = landscape ? {x: (_user$project$Main$dims.outerMargin + _user$project$Main$dims.innerMargin) + _user$project$Main$dims.width, y: _user$project$Main$dims.outerMargin + ((_user$project$Main$dims.height / 2) | 0)} : {x: _user$project$Main$dims.outerMargin + ((_user$project$Main$dims.width / 2) | 0), y: (_user$project$Main$dims.outerMargin + _user$project$Main$dims.innerMargin) + _user$project$Main$dims.height};
-	return _elm_lang$svg$Svg_Attributes$viewBox(
-		A2(
-			_elm_lang$core$String$join,
-			' ',
-			A2(
-				_elm_lang$core$List$map,
-				_elm_lang$core$Basics$toString,
-				{
-					ctor: '::',
-					_0: 0 - halfRadius.x,
-					_1: {
-						ctor: '::',
-						_0: 0 - halfRadius.y,
-						_1: {
-							ctor: '::',
-							_0: 2 * halfRadius.x,
-							_1: {
-								ctor: '::',
-								_0: 2 * halfRadius.y,
-								_1: {ctor: '[]'}
-							}
-						}
-					}
-				})));
+	return A4(_user$project$Svg_TypedAttributes$viewBox, 0 - halfRadius.x, 0 - halfRadius.y, 2 * halfRadius.x, 2 * halfRadius.y);
 };
 var _user$project$Main$frame = F2(
 	function (window, contents) {
 		var slightlyLessThan = function (x) {
-			return _elm_lang$core$Basics$toString(((x * 24) / 25) | 0);
+			return _user$project$Svg_TypedAttributes$num(
+				_elm_lang$core$Basics$toFloat(((x * 24) / 25) | 0));
 		};
 		return A2(
 			_elm_lang$html$Html$div,
@@ -12767,11 +12647,11 @@ var _user$project$Main$frame = F2(
 					_elm_lang$svg$Svg$svg,
 					{
 						ctor: '::',
-						_0: _elm_lang$svg$Svg_Attributes$width(
+						_0: _user$project$Svg_TypedAttributes$width(
 							slightlyLessThan(window.width)),
 						_1: {
 							ctor: '::',
-							_0: _elm_lang$svg$Svg_Attributes$height(
+							_0: _user$project$Svg_TypedAttributes$height(
 								slightlyLessThan(window.height)),
 							_1: {
 								ctor: '::',
@@ -12869,19 +12749,22 @@ var _user$project$Main$stableWobbler = function (time) {
 		_elm_lang$svg$Svg$circle,
 		{
 			ctor: '::',
-			_0: _elm_lang$svg$Svg_Attributes$cx('0'),
+			_0: _user$project$Svg_TypedAttributes$cx(
+				_user$project$Svg_TypedAttributes$num(0)),
 			_1: {
 				ctor: '::',
-				_0: _elm_lang$svg$Svg_Attributes$cy('0'),
+				_0: _user$project$Svg_TypedAttributes$cy(
+					_user$project$Svg_TypedAttributes$num(0)),
 				_1: {
 					ctor: '::',
-					_0: _elm_lang$svg$Svg_Attributes$r('30'),
+					_0: _user$project$Svg_TypedAttributes$r(
+						_user$project$Svg_TypedAttributes$num(30)),
 					_1: {
 						ctor: '::',
-						_0: _elm_lang$svg$Svg_Attributes$fill('none'),
+						_0: _user$project$Svg_TypedAttributes$fill(_user$project$Svg_TypedAttributes$noPaint),
 						_1: {
 							ctor: '::',
-							_0: _elm_lang$svg$Svg_Attributes$pointerEvents('visible'),
+							_0: _user$project$Svg_TypedAttributes$pointerEventsVisible,
 							_1: {
 								ctor: '::',
 								_0: _elm_lang$svg$Svg_Events$onClick(
